@@ -2,6 +2,8 @@
 #define __VEC_HPP__
 
 #include <cmath> // for sqrt function
+#include <vector> // for matrix storage
+#include <stdexcept> // for exception handling
 
 template <typename T>
 class Tvec2
