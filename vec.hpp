@@ -61,4 +61,37 @@ public:
 typedef Tvec2<float> vec2;
 typedef Tvec2<int> ivec2;
 
+template <typename T>
+class Tvec3
+{
+private:
+    T components[3];
+
+public:
+    Tvec3() : components{0, 0, 0}, x(components[0]), y(components[1]), z(components[2]) {}
+
+    Tvec3(const Tvec3& cp) : Tvec3() {
+        x = cp.x;
+        y = cp.y;
+        z = cp.z;
+    }
+
+    Tvec3(T _x, T _y, T _z) : Tvec3() {
+        x = _x;
+        y = _y;
+        z = _z;
+    }
+
+    Tvec3& operator=(const Tvec3& cp) {
+        if (this != &cp) {
+            x = cp.x;
+            y = cp.y;
+            z = cp.z;
+        }
+        return *this;
+    }
+
+    T& x, &y, &z;
+};
+
 #endif // __VEC_HPP__
