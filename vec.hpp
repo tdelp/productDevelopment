@@ -23,6 +23,18 @@ public:
         }
         return *this;
     }
+
+    Tvec2 operator+(const Tvec2& rhs) const {
+        return Tvec2(x + rhs.x, y + rhs.y);
+    }
+
+    Tvec2 operator-(const Tvec2& rhs) const {
+        return Tvec2(x - rhs.x, y - rhs.y);
+    }
+
+    Tvec2 operator*(T scalar) const {
+        return Tvec2(x * scalar, y * scalar);
+    }
 };
 
 typedef Tvec2<float> vec2;
