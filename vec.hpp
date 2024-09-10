@@ -50,6 +50,11 @@ public:
         return std::sqrt(x * x + y * y);
     }
 
+    Tvec2 unit() const {
+        float mag = magnitude();
+        return Tvec2(x / mag, y / mag);
+    }
+
     T& x, &y;
 };
 
