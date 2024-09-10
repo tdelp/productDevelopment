@@ -90,7 +90,18 @@ public:
         }
         return *this;
     }
+    
+    Tvec3 operator+(const Tvec3& rhs) const {
+        return Tvec3(x + rhs.x, y + rhs.y, z + rhs.z);
+    }
 
+    Tvec3 operator-(const Tvec3& rhs) const {
+        return Tvec3(x - rhs.x, y - rhs.y, z - rhs.z);
+    }
+
+    Tvec3 operator*(T scalar) const {
+        return Tvec3(x * scalar, y * scalar, z * scalar);
+    }
     T& x, &y, &z;
 };
 
