@@ -173,6 +173,33 @@ public:
         }
         return result;
     }
+
+    // Transpose
+    Matrix transpose() const {
+        Matrix result(cols, rows);
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                result(j, i) = data[i][j];
+            }
+        }
+        return result;
+    }
+
+    // Equality operator
+    bool operator==(const Matrix& rhs) const {
+        if (rows != rhs.rows || cols != rhs.cols) {
+            return false;
+        }
+
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                if (data[i][j] != rhs.data[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 };
 
 #endif // __VEC_HPP__
