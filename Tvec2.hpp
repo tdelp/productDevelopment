@@ -1,5 +1,7 @@
-#ifndef __VEC_HPP__
-#define __VEC_HPP__
+#ifndef __TVEC2_HPP__
+#define __TVEC2_HPP__
+
+#include <cmath> // for sqrt function
 
 template <typename T>
 class Tvec2
@@ -59,4 +61,4 @@ public:
 typedef Tvec2<float> vec2;
 typedef Tvec2<int> ivec2;
 
-#endif // __VEC_HPP__
+#endif // __TVEC2_HPP__

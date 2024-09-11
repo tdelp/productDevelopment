@@ -1,5 +1,9 @@
-#ifndef __VEC_HPP__
-#define __VEC_HPP__
+#ifndef __MATRIX_HPP__
+#define __MATRIX_HPP__
+
+#include <cmath> // for sqrt function
+#include <vector> // for matrix storage
+#include <stdexcept> // for exception handling
 
 template <typename T>
 class Matrix {
@@ -70,4 +74,4 @@ public:
     }
 };
 
-#endif // __VEC_HPP__
+#endif // __MATRIX_HPP__
