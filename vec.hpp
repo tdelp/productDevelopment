@@ -132,4 +132,47 @@ public:
 typedef Tvec3<float> vec3;
 typedef Tvec3<int> ivec3;
 
+// Matrix class implementation
+template <typename T>
+class Matrix {
+private:
+    std::vector<std::vector<T>> data;
+    int rows, cols;
+
+public:
+    // Constructor
+    Matrix(int _rows, int _cols) : rows(_rows), cols(_cols) {
+        data.resize(rows, std::vector<T>(cols, 0)); // Initialize all elements to zero
+    }
+
+    // Access element
+    T& operator()(int row, int col) {
+        if (row >= rows || col >= cols) {
+            throw std::out_of_range("Index out of bounds");
+        }
+        return data[row][col];
+    }
+
+    // Get matrix dimensions
+    int numRows() const { return rows; }
+    int numCols() const { return cols; }
+
+    // Matrix multiplication
+    Matrix operator*(const Matrix& rhs) const {
+        if (cols != rhs.rows) {
+            throw std::invalid_argument("Matrix dimensions do not match for multiplication");
+        }
+
+        Matrix result(rows, rhs.cols);
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < rhs.cols; ++j) {
+                for (int k = 0; k < cols; ++k) {
+                    result(i, j) += data[i][k] * rhs.data[k][j];
+                }
+            }
+        }
+        return result;
+    }
+};
+
 #endif // __VEC_HPP__
