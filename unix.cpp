@@ -72,6 +72,26 @@ void test_tvec2_unit_vector() {
         std::cout << "Tvec2 unit vector test FAILED!\n";
 }
 
+void test_tvec2_safe_unit_vector() {
+    vec2 v(0.0f, 0.0f);  // A zero vector
+    vec2 result = v.safeUnit();
+
+    if (result.x == 0.0f && result.y == 0.0f)
+        std::cout << "Tvec2 safe unit vector test PASSED!\n";
+    else
+        std::cout << "Tvec2 safe unit vector test FAILED!\n";
+}
+
+void test_tvec2_unit_vector_exception() {
+    vec2 v(0.0f, 0.0f);
+    try {
+        vec2 result = v.unit();
+        std::cout << "Tvec2 unit vector exception test FAILED!\n";  // Should not reach here
+    } catch (const std::runtime_error&) {
+        std::cout << "Tvec2 unit vector exception test PASSED!\n";  // Expected behavior
+    }
+}
+
 // Tvec3 tests
 void test_tvec3_addition() {
     vec3 v1(1.0f, 2.0f, 3.0f);
@@ -153,6 +173,26 @@ void test_tvec3_cross_product() {
         std::cout << "Tvec3 cross product test PASSED!\n\n";
     else
         std::cout << "Tvec3 cross product test FAILED!\n\n";
+}
+
+void test_tvec3_safe_unit_vector() {
+    vec3 v(0.0f, 0.0f, 0.0f);  // A zero vector
+    vec3 result = v.safeUnit();
+
+    if (result.x == 0.0f && result.y == 0.0f && result.z == 0.0f)
+        std::cout << "Tvec3 safe unit vector test PASSED!\n";
+    else
+        std::cout << "Tvec3 safe unit vector test FAILED!\n";
+}
+
+void test_tvec3_unit_vector_exception() {
+    vec3 v(0.0f, 0.0f, 0.0f);
+    try {
+        vec3 result = v.unit();
+        std::cout << "Tvec3 unit vector exception test FAILED!\n";  // Should not reach here
+    } catch (const std::runtime_error&) {
+        std::cout << "Tvec3 unit vector exception test PASSED!\n";  // Expected behavior
+    }
 }
 
 // Matrix tests
@@ -254,6 +294,8 @@ int main() {
     test_tvec2_dot_product();
     test_tvec2_magnitude();
     test_tvec2_unit_vector();
+    test_tvec2_safe_unit_vector();
+    test_tvec2_unit_vector_exception();
 
     std::cout << "\nRunning Tvec3 tests...\n";
     test_tvec3_addition();
@@ -262,6 +304,8 @@ int main() {
     test_tvec3_dot_product();
     test_tvec3_magnitude();
     test_tvec3_unit_vector();
+    test_tvec3_safe_unit_vector();
+    test_tvec3_unit_vector_exception();
     test_tvec3_cross_product();
 
     std::cout << "Running Matrix tests...\n";

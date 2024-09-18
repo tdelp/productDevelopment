@@ -2,8 +2,8 @@
 #define __TVEC2_HPP__
 
 #include <cmath> // for sqrt function
+#include <stdexcept> // for exception handling
 
-// Template class for 2D vectors
 template <typename T>
 class Tvec2
 {
@@ -63,7 +63,41 @@ public:
     // Return the unit vector (normalized vector)
     Tvec2 unit() const {
         float mag = magnitude();
+        if (mag == 0) {
+            throw std::runtime_error("Cannot normalize a vector with magnitude 0");
+        }
         return Tvec2(x / mag, y / mag);
+    }
+
+    // Specialized method to handle zero vectors:
+    // Returns a zero vector if magnitude is zero, instead of normalizing
+    Tvec2 safeUnit() const {
+        float mag = magnitude();
+        if (mag == 0) {
+            return *this;  // Return the zero vector as it is
+        }
+        return Tvec2(x / mag, y / mag);
+    }
+
+    // In-place vector addition
+    Tvec2& operator+=(const Tvec2& rhs) {
+        x += rhs.x;
+        y += rhs.y;
+        return *this;
+    }
+
+    // In-place vector subtraction
+    Tvec2& operator-=(const Tvec2& rhs) {
+        x -= rhs.x;
+        y -= rhs.y;
+        return *this;
+    }
+
+    // In-place scalar multiplication
+    Tvec2& operator*=(T scalar) {
+        x *= scalar;
+        y *= scalar;
+        return *this;
     }
 
     // x and y are references to the first and second elements of the array

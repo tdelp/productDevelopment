@@ -18,6 +18,16 @@ public:
         data.resize(rows, std::vector<T>(cols, 0)); // Initialize all elements to zero
     }
 
+    // Constructor to initialize a 3x3 matrix from a float[3][3] array
+    Matrix(const float arr[3][3]) : rows(3), cols(3) {
+        data.resize(3, std::vector<T>(3));
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                data[i][j] = arr[i][j];
+            }
+        }
+    }
+
     // Access element at given row and column (with bounds checking)
     T& operator()(int row, int col) {
         if (row >= rows || col >= cols) {
@@ -75,6 +85,29 @@ public:
             }
         }
         return true;  // All elements are equal
+    }
+
+    // Method to normalize the matrix (for vectors)
+    Matrix unitVector() const {
+        T magnitude = 0;
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                magnitude += data[i][j] * data[i][j];
+            }
+        }
+        magnitude = std::sqrt(magnitude);
+
+        if (magnitude == 0) {
+            return *this;  // If magnitude is zero, return the current matrix
+        }
+
+        Matrix result(rows, cols);
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                result(i, j) = data[i][j] / magnitude;
+            }
+        }
+        return result;
     }
 };
 
