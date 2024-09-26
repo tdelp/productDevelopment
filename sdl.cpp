@@ -18,7 +18,15 @@ public:
     ~Screen() {
         SDL_FreeSurface(surface);
     }
+    void setPixel(ivec2 position, ivec3 color) {
+        int x = position.x;
+        int y = position.y;
+        if (x < 0 || x >= width || y < 0 || y >= height) return;
 
+        Uint32* pixels = (Uint32*)surface->pixels;
+        Uint32 pixelColor = SDL_MapRGB(surface->format, color.x, color.y, color.z);
+        pixels[(y * surface->w) + x] = pixelColor;
+    }
 };
 
 int main(int argc, char* args[])
