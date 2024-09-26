@@ -61,6 +61,11 @@ public:
         }
     }
 
+    void drawSafeBox(ivec2 min, ivec2 max, ivec3 color) {
+        if (min.x < 0 || max.x >= width || min.y < 0 || max.y >= height) return;
+        drawBox(min, max, color);
+    }
+
 };
 
 int main(int argc, char* args[])
