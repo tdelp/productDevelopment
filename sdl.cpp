@@ -18,6 +18,7 @@ public:
     ~Screen() {
         SDL_FreeSurface(surface);
     }
+
     void setPixel(ivec2 position, ivec3 color) {
         int x = position.x;
         int y = position.y;
@@ -27,6 +28,11 @@ public:
         Uint32 pixelColor = SDL_MapRGB(surface->format, color.x, color.y, color.z);
         pixels[(y * surface->w) + x] = pixelColor;
     }
+
+    void blitTo(SDL_Surface* destSurface) {
+        SDL_BlitSurface(surface, NULL, destSurface, NULL);
+    }
+    
 };
 
 int main(int argc, char* args[])
