@@ -4,7 +4,7 @@
 #include <algorithm> // For std::min and std::max
 #include "all_headers.hpp"
 
-const int RES_X = 960;
+const int RES_X = 2000;
 const int RES_Y = 540;
 
 class Screen {
@@ -65,7 +65,6 @@ public:
         if (min.x < 0 || max.x >= width || min.y < 0 || max.y >= height) return;
         drawBox(min, max, color);
     }
-
 };
 
 int main(int argc, char* args[])
