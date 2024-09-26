@@ -32,7 +32,22 @@ public:
     void blitTo(SDL_Surface* destSurface) {
         SDL_BlitSurface(surface, NULL, destSurface, NULL);
     }
-    
+
+    void drawLine(ivec2 start, ivec2 end, ivec3 color) {
+        int dx = abs(end.x - start.x), dy = abs(end.y - start.y);
+        int sx = (start.x < end.x) ? 1 : -1;
+        int sy = (start.y < end.y) ? 1 : -1;
+        int err = dx - dy;
+
+        while (true) {
+            setPixel(start, color);
+            if (start.x == end.x && start.y == end.y) break;
+            int e2 = 2 * err;
+            if (e2 > -dy) { err -= dy; start.x += sx; }
+            if (e2 < dx) { err += dx; start.y += sy; }
+        }
+    }
+
 };
 
 int main(int argc, char* args[])
