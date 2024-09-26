@@ -48,6 +48,19 @@ public:
         }
     }
 
+    void drawBox(ivec2 min, ivec2 max, ivec3 color) {
+        int minX = std::min(min.x, max.x);
+        int maxX = std::max(min.x, max.x);
+        int minY = std::min(min.y, max.y);
+        int maxY = std::max(min.y, max.y);
+
+        for (int x = minX; x <= maxX; ++x) {
+            for (int y = minY; y <= maxY; ++y) {
+                setPixel(ivec2(x, y), color);
+            }
+        }
+    }
+
 };
 
 int main(int argc, char* args[])
