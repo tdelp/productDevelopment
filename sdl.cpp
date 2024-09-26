@@ -18,6 +18,7 @@ public:
     ~Screen() {
         SDL_FreeSurface(surface);
     }
+
 };
 
 int main(int argc, char* args[])
