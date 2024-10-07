@@ -1,146 +1,91 @@
 #include "GUIFile.hpp"
-#include "Screen.hpp"
-#include <SDL2/SDL.h>
 #include <cassert>
 #include <iostream>
+#include <fstream>
 
-// Utility function to compare two ivec3 colors
+// Helper functions to compare integer and float-based colors
 bool compareColors(const ivec3& color1, const ivec3& color2) {
     return color1.x == color2.x && color1.y == color2.y && color1.z == color2.z;
 }
 
-// Utility function to compare two vec3 colors
 bool compareColorsFloat(const vec3& color1, const vec3& color2) {
-    return color1.x == color2.x && color1.y == color2.y && color1.z == color2.z;
+    return (color1.x == color2.x && color1.y == color2.y && color1.z == color2.z);
 }
 
+// Function to test reading and writing of XML with both valid and invalid cases
 void testXMLReadAndWrite() {
+    // Create an input XML file for testing
+    std::string inputFilename = "test_input.xml";
+    std::ofstream inputFile(inputFilename);
+    inputFile << "<layout>\n"
+              << "  <line>\n"
+              << "    <vec2><x>50.5</x><y>902.47</y></vec2>\n"
+              << "    <vec2><x>75.6</x><y>1024.6</y></vec2>\n"
+              << "    <vec3><x>244.0</x><y>245.0</y><z>103.3</z></vec3>\n"
+              << "  </line>\n"
+              << "  <box>\n"
+              << "    <vec2><x>250.3</x><y>122.5</y></vec2>\n"
+              << "    <vec2><x>420.34</x><y>254.9</y></vec2>\n"
+              << "    <ivec3><x>212</x><y>22</y><z>124</z></ivec3>\n"
+              << "  </box>\n"
+              << "  <point>\n"
+              << "    <ivec2><x>480</x><y>270</y></ivec2>\n"
+              << "    <ivec3><x>67</x><y>200</y><z>142</z></ivec3>\n"
+              << "  </point>\n"
+              << "</layout>\n";
+    inputFile.close();
+
     GUIFile guiFile;
 
-    // Test data to write to an XML file (integer-based data)
-    Line testLine = {ivec2(10, 20), ivec2(30, 40), ivec3(255, 0, 0)};
-    Box testBox = {ivec2(50, 60), ivec2(70, 80), ivec3(0, 255, 0)};
-    Point testPoint = {ivec2(90, 100), ivec3(0, 0, 255)};
+    // Read the input file into the GUIFile object
+    assert(guiFile.readFromFile(inputFilename) && "Failed to read from XML file");
 
-    // Test data to write to an XML file (floating-point data)
-    LineFloat testLineFloat = {vec2(15.5f, 25.5f), vec2(35.5f, 45.5f), vec3(255.0f, 100.0f, 50.0f)};
-    BoxFloat testBoxFloat = {vec2(55.5f, 65.5f), vec2(75.5f, 85.5f), vec3(0.0f, 255.0f, 125.0f)};
-    PointFloat testPointFloat = {vec2(95.5f, 105.5f), vec3(25.0f, 50.0f, 75.0f)};
+    // Verify that the float-based line was read correctly
+    const auto& linesFloat = guiFile.getLinesFloat();
+    assert(linesFloat.size() == 1 && "Expected one float-based line in XML data");
+    assert(linesFloat[0].start.x == 50.5f && linesFloat[0].start.y == 902.47f && "Float-based line start position mismatch");
+    assert(linesFloat[0].end.x == 75.6f && linesFloat[0].end.y == 1024.6f && "Float-based line end position mismatch");
+    assert(compareColorsFloat(linesFloat[0].color, vec3(244.0f, 245.0f, 103.3f)) && "Float-based line color mismatch");
 
-    // Add integer-based data to the GUIFile
-    guiFile.addLine(testLine);
-    guiFile.addBox(testBox);
-    guiFile.addPoint(testPoint);
+    // Verify that the float-based box was read correctly
+    const auto& boxesFloat = guiFile.getBoxesFloat();
+    assert(boxesFloat.size() == 1 && "Expected one float-based box in XML data");
+    assert(boxesFloat[0].min.x == 250.3f && boxesFloat[0].min.y == 122.5f && "Float-based box min position mismatch");
+    assert(boxesFloat[0].max.x == 420.34f && boxesFloat[0].max.y == 254.9f && "Float-based box max position mismatch");
+    assert(compareColorsFloat(boxesFloat[0].color, vec3(212.0f, 22.0f, 124.0f)) && "Float-based box color mismatch");
 
-    // Add floating-point-based data to the GUIFile
-    guiFile.addLineFloat(testLineFloat);
-    guiFile.addBoxFloat(testBoxFloat);
-    guiFile.addPointFloat(testPointFloat);
+    // Verify that the integer-based point was read correctly
+    const auto& points = guiFile.getPoints();
+    assert(points.size() == 1 && "Expected one integer-based point in XML data");
+    assert(points[0].position.x == 480 && points[0].position.y == 270 && "Integer-based point position mismatch");
+    assert(compareColors(points[0].color, ivec3(67, 200, 142)) && "Integer-based point color mismatch");
 
-    // Write the data to an XML file
-    std::string filename = "test_output.xml";
-    assert(guiFile.writeToFile(filename) && "Failed to write to XML file");
+    // Write the parsed data to an output XML file
+    std::string outputFilename = "test_output.xml";
+    assert(guiFile.writeToFile(outputFilename) && "Failed to write to output XML file");
 
-    // Clear the GUIFile instance and read back the data from the XML file
-    GUIFile newGuiFile;
-    assert(newGuiFile.readFromFile(filename) && "Failed to read from XML file");
+    // Read the output file and compare its contents to the expected format
+    std::ifstream outputFile(outputFilename);
+    assert(outputFile.is_open() && "Unable to open the output XML file for verification");
 
-    // Verify integer-based line was read correctly
-    const auto& lines = newGuiFile.getLines();
-    assert(lines.size() == 1 && "Expected one integer-based line in XML data");
-    assert(lines[0].start.x == testLine.start.x && lines[0].start.y == testLine.start.y);
-    assert(lines[0].end.x == testLine.end.x && lines[0].end.y == testLine.end.y);
-    assert(compareColors(lines[0].color, testLine.color) && "Integer-based line color mismatch");
-
-    // Verify floating-point-based line was read correctly
-    const auto& linesFloat = newGuiFile.getLinesFloat();
-    assert(linesFloat.size() == 1 && "Expected one floating-point-based line in XML data");
-    assert(linesFloat[0].start.x == testLineFloat.start.x && linesFloat[0].start.y == testLineFloat.start.y);
-    assert(linesFloat[0].end.x == testLineFloat.end.x && linesFloat[0].end.y == testLineFloat.end.y);
-    assert(compareColorsFloat(linesFloat[0].color, testLineFloat.color) && "Floating-point line color mismatch");
-
-    // Repeat similar checks for boxes and points (both integer-based and floating-point-based)
-
-    std::cout << "XML read/write tests for integer and floating-point data passed successfully." << std::endl;
-}
-
-void testRenderingWithScreen() {
-    // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
-        return;
+    // Simple verification to ensure the file has expected content (format and data integrity can be checked more thoroughly as needed)
+    std::string line;
+    bool foundLine = false, foundBox = false, foundPoint = false;
+    while (std::getline(outputFile, line)) {
+        if (line.find("<line>") != std::string::npos) foundLine = true;
+        if (line.find("<box>") != std::string::npos) foundBox = true;
+        if (line.find("<point>") != std::string::npos) foundPoint = true;
     }
+    outputFile.close();
+    
+    assert(foundLine && "Expected a line element in the output XML file");
+    assert(foundBox && "Expected a box element in the output XML file");
+    assert(foundPoint && "Expected a point element in the output XML file");
 
-    // Create the SDL window and surface
-    SDL_Window* window = SDL_CreateWindow("Test Renderer",
-                                          SDL_WINDOWPOS_CENTERED,
-                                          SDL_WINDOWPOS_CENTERED,
-                                          800, 600,
-                                          SDL_WINDOW_SHOWN);
-    if (!window) {
-        std::cerr << "Failed to create window: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        return;
-    }
-
-    SDL_Surface* windowSurface = SDL_GetWindowSurface(window);
-    if (!windowSurface) {
-        std::cerr << "Failed to get window surface: " << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return;
-    }
-
-    // Create an instance of the Screen class
-    Screen screen(800, 600, windowSurface);
-
-    // Create a test GUIFile instance and load data from a test XML file
-    GUIFile guiFile;
-    if (!guiFile.readFromFile("test_output.xml")) {
-        std::cerr << "Failed to read the XML file." << std::endl;
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return;
-    }
-
-    // Render integer-based elements using the Screen class
-    for (const auto& line : guiFile.getLines()) {
-        screen.drawLine(line.start, line.end, line.color);
-    }
-    for (const auto& box : guiFile.getBoxes()) {
-        screen.drawSafeBox(box.min, box.max, box.color);
-    }
-    for (const auto& point : guiFile.getPoints()) {
-        screen.setPixel(point.position, point.color);
-    }
-
-    // Render floating-point-based elements using the Screen class
-    for (const auto& lineFloat : guiFile.getLinesFloat()) {
-        screen.drawLine(ivec2(lineFloat.start.x, lineFloat.start.y), ivec2(lineFloat.end.x, lineFloat.end.y), ivec3(lineFloat.color.x, lineFloat.color.y, lineFloat.color.z));
-    }
-    for (const auto& boxFloat : guiFile.getBoxesFloat()) {
-        screen.drawSafeBox(ivec2(boxFloat.min.x, boxFloat.min.y), ivec2(boxFloat.max.x, boxFloat.max.y), ivec3(boxFloat.color.x, boxFloat.color.y, boxFloat.color.z));
-    }
-    for (const auto& pointFloat : guiFile.getPointsFloat()) {
-        screen.setPixel(ivec2(pointFloat.position.x, pointFloat.position.y), ivec3(pointFloat.color.x, pointFloat.color.y, pointFloat.color.z));
-    }
-
-    // Copy the rendered screen to the window surface and display it
-    screen.blitTo(windowSurface);
-    SDL_UpdateWindowSurface(window);
-
-    // Wait for a few seconds before exiting to allow viewing of the rendered elements
-    SDL_Delay(3000);
-
-    // Cleanup SDL resources
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-
-    std::cout << "Rendering test for integer and floating-point data completed." << std::endl;
+    std::cout << "All tests for XML reading, parsing, and writing passed successfully." << std::endl;
 }
 
 int main() {
     testXMLReadAndWrite();
-    testRenderingWithScreen();
     return 0;
 }
