@@ -7,7 +7,8 @@
 
 class XMLParser {
 public:
-    static bool parseXML(const std::string& filename, std::vector<Line>& lines, std::vector<Box>& boxes, std::vector<Point>& points);
+    static bool parseXML(const std::string& filename, std::vector<Line>& lines, std::vector<Box>& boxes, std::vector<Point>& points,
+                         std::vector<LineFloat>& linesFloat, std::vector<BoxFloat>& boxesFloat, std::vector<PointFloat>& pointsFloat);
 };
 
 #endif // __XMLPARSER_HPP__
