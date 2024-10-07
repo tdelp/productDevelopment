@@ -19,3 +19,15 @@ void GUIFile::addBox(Box box) {
 void GUIFile::addPoint(Point point) {
     points.push_back(point);
 }
+
+const std::vector<Line>& GUIFile::getLines() const {
+    return lines;
+}
+
+const std::vector<Box>& GUIFile::getBoxes() const {
+    return boxes;
+}
+
+const std::vector<Point>& GUIFile::getPoints() const {
+    return points;
+}

@@ -33,4 +33,8 @@ void addLine(Line line);
 void addBox(Box box);
 void addPoint(Point point);
 
+const std::vector<Line>& getLines() const;
+const std::vector<Box>& getBoxes() const;
+const std::vector<Point>& getPoints() const;
+
 #endif // __GUIFILE_HPP__
