@@ -2,6 +2,7 @@
 #define __SCREEN_HPP__
 
 #include "all_headers.hpp"
+#include <SDL2/SDL.h>
 
 class Screen {
 public:
@@ -83,4 +84,4 @@ public:
 
 };
 
-#endif // __TVEC2_HPP__
+#endif // __SCREEN_HPP__
