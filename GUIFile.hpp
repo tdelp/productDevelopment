@@ -1,4 +1,3 @@
-// GUIFile.hpp
 #ifndef __GUIFILE_HPP__
 #define __GUIFILE_HPP__
 
@@ -27,16 +26,22 @@ class GUIFile {
 public:
     GUIFile();
     ~GUIFile();
+
+    void addLine(Line line);
+    void addBox(Box box);
+    void addPoint(Point point);
+
+    const std::vector<Line>& getLines() const;
+    const std::vector<Box>& getBoxes() const;
+    const std::vector<Point>& getPoints() const;
+
+    bool writeToFile(const std::string& filename);
+    bool readFromFile(const std::string& filename); // Added readFromFile method
+
+private:
+    std::vector<Line> lines;
+    std::vector<Box> boxes;
+    std::vector<Point> points;
 };
-
-void addLine(Line line);
-void addBox(Box box);
-void addPoint(Point point);
-
-const std::vector<Line>& getLines() const;
-const std::vector<Box>& getBoxes() const;
-const std::vector<Point>& getPoints() const;
-
-bool writeToFile(const std::string& filename);
 
 #endif // __GUIFILE_HPP__
