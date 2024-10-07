@@ -29,4 +29,8 @@ public:
     ~GUIFile();
 };
 
+void addLine(Line line);
+void addBox(Box box);
+void addPoint(Point point);
+
 #endif // __GUIFILE_HPP__
