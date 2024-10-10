@@ -2,6 +2,7 @@
 #include "Screen.hpp"
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <cmath> // Include cmath for the round function
 
 int main(int argc, char* argv[]) {
     // Initialize SDL and create a window
@@ -10,17 +11,18 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SDL_Window* window = SDL_CreateWindow("GUI Element Display", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
+    // Create a window with a default size of 1280x720
+    SDL_Window* window = SDL_CreateWindow("GUI Element Display", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN);
     if (!window) {
         std::cerr << "Failed to create window: " << SDL_GetError() << std::endl;
         SDL_Quit();
         return 1;
     }
 
-    SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
+    SDL_Surface* windowSurface = SDL_GetWindowSurface(window);
 
-    // Create the Screen object to handle drawing operations
-    Screen screen(800, 600, screenSurface);
+    // Create the Screen object with a size of 1280x720
+    Screen screen(1280, 720, SDL_CreateRGBSurface(0, 1280, 720, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0));
 
     // Load and parse the XML file with GUI elements
     GUIFile guiFile;
@@ -31,40 +33,51 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Clear the screen before drawing
-    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0, 0, 0)); // Fill with black color
+    // Clear the screen before drawing by filling it with a black color
+    SDL_FillRect(screen.surface, NULL, SDL_MapRGB(screen.surface->format, 0, 0, 0)); 
 
-    // Render parsed lines
+    // Render parsed lines to the screen with debugging output
     for (const auto& line : guiFile.getLines()) {
-        screen.drawLine(
-            ivec2(line.start[0], line.start[1]),
-            ivec2(line.end[0], line.end[1]),
-            ivec3(line.color[0], line.color[1], line.color[2])
+        int startX = static_cast<int>(std::round(line.start[0]));
+        int startY = static_cast<int>(std::round(line.start[1]));
+        int endX = static_cast<int>(std::round(line.end[0]));
+        int endY = static_cast<int>(std::round(line.end[1]));
+        int colorR = static_cast<int>(std::round(line.color[0]));
+        int colorG = static_cast<int>(std::round(line.color[1]));
+        int colorB = static_cast<int>(std::round(line.color[2]));
+
+        // Draw the line using the safe function
+        screen.drawSafeLine(
+            ivec2(startX, startY),
+            ivec2(endX, endY),
+            ivec3(colorR, colorG, colorB)
         );
     }
 
-    // Render parsed boxes
+    // Render parsed boxes to the screen using the safe drawing function
     for (const auto& box : guiFile.getBoxes()) {
         screen.drawSafeBox(
-            ivec2(box.min[0], box.min[1]),
-            ivec2(box.max[0], box.max[1]),
-            ivec3(box.color[0], box.color[1], box.color[2])
+            ivec2(static_cast<int>(std::round(box.min[0])), static_cast<int>(std::round(box.min[1]))),
+            ivec2(static_cast<int>(std::round(box.max[0])), static_cast<int>(std::round(box.max[1]))),
+            ivec3(static_cast<int>(std::round(box.color[0])), static_cast<int>(std::round(box.color[1])), static_cast<int>(std::round(box.color[2])))
         );
     }
 
-    // Render parsed points
+    // Render parsed points to the screen using the safe pixel function
     for (const auto& point : guiFile.getPoints()) {
-        screen.setPixel(
-            ivec2(point.position[0], point.position[1]),
-            ivec3(point.color[0], point.color[1], point.color[2])
+        screen.setSafePixel(
+            ivec2(static_cast<int>(std::round(point.position[0])), static_cast<int>(std::round(point.position[1]))),
+            ivec3(static_cast<int>(std::round(point.color[0])), static_cast<int>(std::round(point.color[1])), static_cast<int>(std::round(point.color[2])))
         );
     }
+
+    // Blit the screen surface to the window surface
+    screen.blitTo(windowSurface);
 
     // Update the window surface to display the drawn elements
-    screen.blitTo(screenSurface);
     SDL_UpdateWindowSurface(window);
 
-    // Event loop to keep the window open
+    // Event loop to keep the window open and handle SDL events
     bool running = true;
     SDL_Event event;
     while (running) {
@@ -73,7 +86,7 @@ int main(int argc, char* argv[]) {
                 running = false; // Break the loop if the user closes the window
             }
         }
-        SDL_Delay(16); // Delay to control the loop speed
+        SDL_Delay(16); // Control the loop speed to avoid high CPU usage
     }
 
     // Clean up SDL resources
