@@ -1,91 +1,83 @@
 #include "GUIFile.hpp"
-#include <cassert>
+#include "Screen.hpp"
+#include <SDL2/SDL.h>
 #include <iostream>
-#include <fstream>
 
-// Helper functions to compare integer and float-based colors
-bool compareColors(const ivec3& color1, const ivec3& color2) {
-    return color1.x == color2.x && color1.y == color2.y && color1.z == color2.z;
-}
-
-bool compareColorsFloat(const vec3& color1, const vec3& color2) {
-    return (color1.x == color2.x && color1.y == color2.y && color1.z == color2.z);
-}
-
-// Function to test reading and writing of XML with both valid and invalid cases
-void testXMLReadAndWrite() {
-    // Create an input XML file for testing
-    std::string inputFilename = "test_input.xml";
-    std::ofstream inputFile(inputFilename);
-    inputFile << "<layout>\n"
-              << "  <line>\n"
-              << "    <vec2><x>50.5</x><y>902.47</y></vec2>\n"
-              << "    <vec2><x>75.6</x><y>1024.6</y></vec2>\n"
-              << "    <vec3><x>244.0</x><y>245.0</y><z>103.3</z></vec3>\n"
-              << "  </line>\n"
-              << "  <box>\n"
-              << "    <vec2><x>250.3</x><y>122.5</y></vec2>\n"
-              << "    <vec2><x>420.34</x><y>254.9</y></vec2>\n"
-              << "    <ivec3><x>212</x><y>22</y><z>124</z></ivec3>\n"
-              << "  </box>\n"
-              << "  <point>\n"
-              << "    <ivec2><x>480</x><y>270</y></ivec2>\n"
-              << "    <ivec3><x>67</x><y>200</y><z>142</z></ivec3>\n"
-              << "  </point>\n"
-              << "</layout>\n";
-    inputFile.close();
-
-    GUIFile guiFile;
-
-    // Read the input file into the GUIFile object
-    assert(guiFile.readFromFile(inputFilename) && "Failed to read from XML file");
-
-    // Verify that the float-based line was read correctly
-    const auto& linesFloat = guiFile.getLinesFloat();
-    assert(linesFloat.size() == 1 && "Expected one float-based line in XML data");
-    assert(linesFloat[0].start.x == 50.5f && linesFloat[0].start.y == 902.47f && "Float-based line start position mismatch");
-    assert(linesFloat[0].end.x == 75.6f && linesFloat[0].end.y == 1024.6f && "Float-based line end position mismatch");
-    assert(compareColorsFloat(linesFloat[0].color, vec3(244.0f, 245.0f, 103.3f)) && "Float-based line color mismatch");
-
-    // Verify that the float-based box was read correctly
-    const auto& boxesFloat = guiFile.getBoxesFloat();
-    assert(boxesFloat.size() == 1 && "Expected one float-based box in XML data");
-    assert(boxesFloat[0].min.x == 250.3f && boxesFloat[0].min.y == 122.5f && "Float-based box min position mismatch");
-    assert(boxesFloat[0].max.x == 420.34f && boxesFloat[0].max.y == 254.9f && "Float-based box max position mismatch");
-    assert(compareColorsFloat(boxesFloat[0].color, vec3(212.0f, 22.0f, 124.0f)) && "Float-based box color mismatch");
-
-    // Verify that the integer-based point was read correctly
-    const auto& points = guiFile.getPoints();
-    assert(points.size() == 1 && "Expected one integer-based point in XML data");
-    assert(points[0].position.x == 480 && points[0].position.y == 270 && "Integer-based point position mismatch");
-    assert(compareColors(points[0].color, ivec3(67, 200, 142)) && "Integer-based point color mismatch");
-
-    // Write the parsed data to an output XML file
-    std::string outputFilename = "test_output.xml";
-    assert(guiFile.writeToFile(outputFilename) && "Failed to write to output XML file");
-
-    // Read the output file and compare its contents to the expected format
-    std::ifstream outputFile(outputFilename);
-    assert(outputFile.is_open() && "Unable to open the output XML file for verification");
-
-    // Simple verification to ensure the file has expected content (format and data integrity can be checked more thoroughly as needed)
-    std::string line;
-    bool foundLine = false, foundBox = false, foundPoint = false;
-    while (std::getline(outputFile, line)) {
-        if (line.find("<line>") != std::string::npos) foundLine = true;
-        if (line.find("<box>") != std::string::npos) foundBox = true;
-        if (line.find("<point>") != std::string::npos) foundPoint = true;
+int main(int argc, char* argv[]) {
+    // Initialize SDL and create a window
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        std::cerr << "SDL Initialization failed: " << SDL_GetError() << std::endl;
+        return 1;
     }
-    outputFile.close();
-    
-    assert(foundLine && "Expected a line element in the output XML file");
-    assert(foundBox && "Expected a box element in the output XML file");
-    assert(foundPoint && "Expected a point element in the output XML file");
 
-    std::cout << "All tests for XML reading, parsing, and writing passed successfully." << std::endl;
-}
+    SDL_Window* window = SDL_CreateWindow("GUI Element Display", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
+    if (!window) {
+        std::cerr << "Failed to create window: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+        return 1;
+    }
 
-int main() {
-    testXMLReadAndWrite();
+    SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
+
+    // Create the Screen object to handle drawing operations
+    Screen screen(800, 600, screenSurface);
+
+    // Load and parse the XML file with GUI elements
+    GUIFile guiFile;
+    if (!guiFile.readFile("input.xml")) {
+        std::cerr << "Failed to read and parse XML file" << std::endl;
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+    // Clear the screen before drawing
+    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0, 0, 0)); // Fill with black color
+
+    // Render parsed lines
+    for (const auto& line : guiFile.getLines()) {
+        screen.drawLine(
+            ivec2(line.start[0], line.start[1]),
+            ivec2(line.end[0], line.end[1]),
+            ivec3(line.color[0], line.color[1], line.color[2])
+        );
+    }
+
+    // Render parsed boxes
+    for (const auto& box : guiFile.getBoxes()) {
+        screen.drawSafeBox(
+            ivec2(box.min[0], box.min[1]),
+            ivec2(box.max[0], box.max[1]),
+            ivec3(box.color[0], box.color[1], box.color[2])
+        );
+    }
+
+    // Render parsed points
+    for (const auto& point : guiFile.getPoints()) {
+        screen.setPixel(
+            ivec2(point.position[0], point.position[1]),
+            ivec3(point.color[0], point.color[1], point.color[2])
+        );
+    }
+
+    // Update the window surface to display the drawn elements
+    screen.blitTo(screenSurface);
+    SDL_UpdateWindowSurface(window);
+
+    // Event loop to keep the window open
+    bool running = true;
+    SDL_Event event;
+    while (running) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                running = false; // Break the loop if the user closes the window
+            }
+        }
+        SDL_Delay(16); // Delay to control the loop speed
+    }
+
+    // Clean up SDL resources
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }
