@@ -8,7 +8,7 @@ CXXFLAGS = -Wall -std=c++17
 SDL2_LIBS = -lSDL2
 
 # Source files
-SRCS = test_gui_file.cpp GUIFile.cpp XMLParser.cpp
+SRCS = test_gui_file.cpp 
 EXEC = test
 
 # Default target
@@ -20,4 +20,4 @@ $(EXEC): $(SRCS)
 
 # Clean up the build
 clean:
-	rm -f $(EXEC) test_output.xml
+	rm -f $(EXEC) output.xml
