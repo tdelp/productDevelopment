@@ -26,7 +26,6 @@ public:
 
         // Check for valid position inside the screen bounds
         if (x < 0 || x >= width || y < 0 || y >= height) {
-            std::cerr << "Error: Pixel coordinates (" << x << ", " << y << ") are out of bounds. Skipping pixel.\n";
             return;
         }
 

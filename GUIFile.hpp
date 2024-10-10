@@ -192,35 +192,63 @@ private:
         writePointElement(points.back());
     }
 
-    // Functions to write elements to the output file
-    void writeLineElement(const Line& line) {
-        if (outputFile.is_open()) {
-            outputFile << "  <line>" << std::endl;
-            outputFile << "    <vec2><x>" << line.start[0] << "</x><y>" << line.start[1] << "</y></vec2>" << std::endl;
-            outputFile << "    <vec2><x>" << line.end[0] << "</x><y>" << line.end[1] << "</y></vec2>" << std::endl;
-            outputFile << "    <vec3><x>" << line.color[0] << "</x><y>" << line.color[1] << "</y><z>" << line.color[2] << "</z></vec3>" << std::endl;
-            outputFile << "  </line>" << std::endl;
-        }
+// Functions to write elements to the output file
+void writeLineElement(const Line& line) {
+    if (outputFile.is_open()) {
+        outputFile << "  <line>" << std::endl;
+        outputFile << "    <vec2>" << std::endl;
+        outputFile << "      <x>" << line.start[0] << "</x>" << std::endl;
+        outputFile << "      <y>" << line.start[1] << "</y>" << std::endl;
+        outputFile << "    </vec2>" << std::endl;
+        outputFile << "    <vec2>" << std::endl;
+        outputFile << "      <x>" << line.end[0] << "</x>" << std::endl;
+        outputFile << "      <y>" << line.end[1] << "</y>" << std::endl;
+        outputFile << "    </vec2>" << std::endl;
+        outputFile << "    <vec3>" << std::endl;
+        outputFile << "      <x>" << line.color[0] << "</x>" << std::endl;
+        outputFile << "      <y>" << line.color[1] << "</y>" << std::endl;
+        outputFile << "      <z>" << line.color[2] << "</z>" << std::endl;
+        outputFile << "    </vec3>" << std::endl;
+        outputFile << "  </line>" << std::endl;
     }
+}
 
-    void writeBoxElement(const Box& box) {
-        if (outputFile.is_open()) {
-            outputFile << "  <box>" << std::endl;
-            outputFile << "    <vec2><x>" << box.min[0] << "</x><y>" << box.min[1] << "</y></vec2>" << std::endl;
-            outputFile << "    <vec2><x>" << box.max[0] << "</x><y>" << box.max[1] << "</y></vec2>" << std::endl;
-            outputFile << "    <vec3><x>" << box.color[0] << "</x><y>" << box.color[1] << "</y><z>" << box.color[2] << "</z></vec3>" << std::endl;
-            outputFile << "  </box>" << std::endl;
-        }
+void writeBoxElement(const Box& box) {
+    if (outputFile.is_open()) {
+        outputFile << "  <box>" << std::endl;
+        outputFile << "    <vec2>" << std::endl;
+        outputFile << "      <x>" << box.min[0] << "</x>" << std::endl;
+        outputFile << "      <y>" << box.min[1] << "</y>" << std::endl;
+        outputFile << "    </vec2>" << std::endl;
+        outputFile << "    <vec2>" << std::endl;
+        outputFile << "      <x>" << box.max[0] << "</x>" << std::endl;
+        outputFile << "      <y>" << box.max[1] << "</y>" << std::endl;
+        outputFile << "    </vec2>" << std::endl;
+        outputFile << "    <vec3>" << std::endl;
+        outputFile << "      <x>" << box.color[0] << "</x>" << std::endl;
+        outputFile << "      <y>" << box.color[1] << "</y>" << std::endl;
+        outputFile << "      <z>" << box.color[2] << "</z>" << std::endl;
+        outputFile << "    </vec3>" << std::endl;
+        outputFile << "  </box>" << std::endl;
     }
+}
 
-    void writePointElement(const Point& point) {
-        if (outputFile.is_open()) {
-            outputFile << "  <point>" << std::endl;
-            outputFile << "    <vec2><x>" << point.position[0] << "</x><y>" << point.position[1] << "</y></vec2>" << std::endl;
-            outputFile << "    <vec3><x>" << point.color[0] << "</x><y>" << point.color[1] << "</y><z>" << point.color[2] << "</z></vec3>" << std::endl;
-            outputFile << "  </point>" << std::endl;
-        }
+void writePointElement(const Point& point) {
+    if (outputFile.is_open()) {
+        outputFile << "  <point>" << std::endl;
+        outputFile << "    <vec2>" << std::endl;
+        outputFile << "      <x>" << point.position[0] << "</x>" << std::endl;
+        outputFile << "      <y>" << point.position[1] << "</y>" << std::endl;
+        outputFile << "    </vec2>" << std::endl;
+        outputFile << "    <vec3>" << std::endl;
+        outputFile << "      <x>" << point.color[0] << "</x>" << std::endl;
+        outputFile << "      <y>" << point.color[1] << "</y>" << std::endl;
+        outputFile << "      <z>" << point.color[2] << "</z>" << std::endl;
+        outputFile << "    </vec3>" << std::endl;
+        outputFile << "  </point>" << std::endl;
     }
+}
+
 
     // Methods to open and close the output file
     void openOutputFile() {
