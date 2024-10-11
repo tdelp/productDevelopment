@@ -1,61 +1,135 @@
-# productDevelopment
-Private repository for Software Development in C++
+# GUIFile
 
-# GUI Renderer Project
+The `GUIFile` class is designed to manage the loading and saving of a GUI environment using XML files. It supports the staging of GUI elements (lines, boxes, points) using setter methods, which can then be written to a file. Additionally, it provides methods for reading an XML file and storing the parsed GUI elements, which can later be accessed through getter methods.
 
-## Overview
-This project implements a GUI rendering system that uses XML files to stage and render graphical elements such as lines, boxes, and points using SDL2. The system includes classes for handling file input/output, XML parsing, and graphical rendering.
+## Class Overview
 
-## Class Documentation
+The `GUIFile` class uses internal containers to store lines, boxes, and points, which can be easily managed and cleared between file operations. These containers are used for both staging elements before writing to a file and for storing elements parsed from an XML file.
 
-### GUIFile
-The `GUIFile` class is responsible for managing the loading and saving of GUI elements from and to XML files. It handles three main types of graphical elements: lines, boxes, and points.
+## Public Methods
 
-#### Public Methods
+### addLine
+- **Description**: Stages a line element to be stored in the class.
+- **Parameters**:
+  - `start` (std::array<float, 2>): Starting coordinates of the line.
+  - `end` (std::array<float, 2>): Ending coordinates of the line.
+  - `color` (std::array<float, 3>): Color of the line in RGB format.
+- **Behavior**: Adds the specified line to the internal lines container for future writing to an XML file.
 
-- **`GUIFile()`**: Constructor that initializes the `GUIFile` object.
-- **`~GUIFile()`**: Destructor that cleans up any resources.
-- **`void addLine(Line line)`**: Adds a `Line` object to the internal list of lines.
-    - **Parameters:** `line` - A `Line` object representing a line element with start and end positions and color.
-- **`void addBox(Box box)`**: Adds a `Box` object to the internal list of boxes.
-    - **Parameters:** `box` - A `Box` object representing a box element with minimum and maximum bounds and color.
-- **`void addPoint(Point point)`**: Adds a `Point` object to the internal list of points.
-    - **Parameters:** `point` - A `Point` object representing a point element with position and color.
-- **`bool writeToFile(const std::string& filename)`**: Writes the staged GUI elements to an XML file.
-    - **Parameters:** `filename` - The name of the file to which the XML data will be written.
-    - **Returns:** `true` if the file was written successfully, `false` otherwise.
-- **`bool readFromFile(const std::string& filename)`**: Reads GUI elements from an XML file and stages them.
-    - **Parameters:** `filename` - The name of the file from which the XML data will be read.
-    - **Returns:** `true` if the file was read successfully, `false` otherwise.
-- **`const std::vector<Line>& getLines() const`**: Retrieves the list of lines parsed from the XML file.
-- **`const std::vector<Box>& getBoxes() const`**: Retrieves the list of boxes parsed from the XML file.
-- **`const std::vector<Point>& getPoints() const`**: Retrieves the list of points parsed from the XML file.
+### addBox
+- **Description**: Stages a box element to be stored in the class.
+- **Parameters**:
+  - `min` (std::array<float, 2>): Minimum bounds of the box.
+  - `max` (std::array<float, 2>): Maximum bounds of the box.
+  - `color` (std::array<float, 3>): Color of the box in RGB format.
+- **Behavior**: Adds the specified box to the internal boxes container for future writing to an XML file.
 
-### Testing
-The project includes comprehensive tests to validate the XML read and write operations, as well as the rendering logic using the `Screen` class.
+### addPoint
+- **Description**: Stages a point element to be stored in the class.
+- **Parameters**:
+  - `position` (std::array<float, 2>): Position of the point.
+  - `color` (std::array<float, 3>): Color of the point in RGB format.
+- **Behavior**: Adds the specified point to the internal points container for future writing to an XML file.
 
-#### Running the Tests
-- **XML Read/Write Test:** Validates the ability of the `GUIFile` class to write GUI elements to an XML file and then read them back, ensuring data integrity.
-- **Rendering Test:** Verifies that the GUI elements are correctly displayed on the screen using the SDL-based `Screen` class.
+### readFile
+- **Description**: Reads an XML file and parses the contents into the internal containers.
+- **Parameters**:
+  - `filename` (std::string): The name of the file to read.
+- **Behavior**: Opens the specified XML file, reads its contents, and parses the GUI elements (lines, boxes, points) into the appropriate containers. Returns `true` if the file was successfully read, otherwise `false`.
 
-To run the tests, execute the `test_gui_file` program. Ensure that SDL2 is correctly installed and linked.
+### getLines
+- **Description**: Retrieves the stored line elements.
+- **Return Type**: `const std::vector<Line>&`
+- **Behavior**: Returns a constant reference to the vector containing all the parsed line elements.
 
-### UML Diagram
-Below is a UML diagram that represents the relationship between the main classes used in this project: `GUIFile`, `Screen`, and `XMLParser`.
+### getBoxes
+- **Description**: Retrieves the stored box elements.
+- **Return Type**: `const std::vector<Box>&`
+- **Behavior**: Returns a constant reference to the vector containing all the parsed box elements.
 
-![UML Diagram](uml_diagram.png)
+### getPoints
+- **Description**: Retrieves the stored point elements.
+- **Return Type**: `const std::vector<Point>&`
+- **Behavior**: Returns a constant reference to the vector containing all the parsed point elements.
 
-- **`GUIFile`**: Manages XML file operations and staging of GUI elements.
-- **`Screen`**: Handles rendering of the graphical elements on the screen using SDL.
-- **`XMLParser`**: Provides functionality to parse XML files and extract GUI elements.
+## XML Writing Methods
 
-### Dependencies
-- **SDL2**: Required for graphical rendering.
-- **Standard C++ libraries**: Required for file I/O operations and data handling.
+### openOutputFile
+- **Description**: Opens the output file for writing and initializes the XML structure.
+- **Behavior**: Writes the opening `<layout>` tag to the file and ensures the file is ready for subsequent writes.
 
-### Getting Started
-1. **Build the Project:** Compile the source files with your preferred C++ compiler and link the SDL2 library.
-2. **Run the Tests:** Use the provided `test_gui_file` program to verify that the XML and rendering functionalities work correctly.
-3. **Usage:** Modify the XML input file to render different GUI elements as desired.
+### closeOutputFile
+- **Description**: Closes the output file after completing the write operations.
+- **Behavior**: Writes the closing `</layout>` tag and properly closes the file.
+
+### writeLineElement
+- **Description**: Writes a staged line element to the XML file.
+- **Parameters**:
+  - `line` (Line): The line element to write.
+- **Behavior**: Outputs the XML representation of the line element to the file.
+
+### writeBoxElement
+- **Description**: Writes a staged box element to the XML file.
+- **Parameters**:
+  - `box` (Box): The box element to write.
+- **Behavior**: Outputs the XML representation of the box element to the file.
+
+### writePointElement
+- **Description**: Writes a staged point element to the XML file.
+- **Parameters**:
+  - `point` (Point): The point element to write.
+- **Behavior**: Outputs the XML representation of the point element to the file.
+
+## Private Methods
+
+### parseVec2
+- **Description**: Parses a 2D vector (vec2 or ivec2) from the XML data.
+- **Parameters**:
+  - `stream` (std::istringstream&): The input stream containing the XML data.
+  - `vector` (std::array<float, 2>&): The array to store the parsed values.
+- **Behavior**: Extracts the `<x>` and `<y>` values and stores them in the provided array.
+
+### parseVec3
+- **Description**: Parses a 3D vector (vec3 or ivec3) from the XML data.
+- **Parameters**:
+  - `stream` (std::istringstream&): The input stream containing the XML data.
+  - `vector` (std::array<float, 3>&): The array to store the parsed values.
+- **Behavior**: Extracts the `<x>`, `<y>`, and `<z>` values and stores them in the provided array.
+
+## Container Design
+
+The `GUIFile` class uses the following containers for managing GUI elements:
+- `std::vector<Line>`: Stores line elements.
+- `std::vector<Box>`: Stores box elements.
+- `std::vector<Point>`: Stores point elements.
+
+### Container Management
+- Containers are cleared when switching between reading and writing operations to optimize memory usage.
+- Elements are staged using setter methods (`addLine`, `addBox`, `addPoint`) and accessed through getter methods (`getLines`, `getBoxes`, `getPoints`) without directly modifying the stored data.
+
+## Future Enhancements
+
+The current implementation is designed to handle simple XML structures. As client requirements evolve, the following enhancements might be considered:
+- Support for hierarchical XML structures.
+- Error handling improvements for more robust parsing of malformed XML files.
+- Extending the GUI element types to support additional shapes or attributes.
+
+## UML Diagram
 
 
+
+## Usage Example
+
+Here is a basic example of how to use the `GUIFile` class:
+
+```cpp
+GUIFile guiFile;
+guiFile.addLine({0.0f, 0.0f}, {1.0f, 1.0f}, {255.0f, 0.0f, 0.0f}); // Staging a line
+guiFile.addBox({0.0f, 0.0f}, {2.0f, 2.0f}, {0.0f, 255.0f, 0.0f});  // Staging a box
+guiFile.addPoint({1.0f, 1.0f}, {0.0f, 0.0f, 255.0f});              // Staging a point
+
+guiFile.readFile("input.xml");                                      // Reading from an XML file
+
+const auto& lines = guiFile.getLines();                             // Accessing parsed lines
+const auto& boxes = guiFile.getBoxes();                             // Accessing parsed boxes
+const auto& points = guiFile.getPoints();                           // Accessing parsed points
