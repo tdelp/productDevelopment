@@ -116,6 +116,49 @@ The current implementation is designed to handle simple XML structures. As clien
 
 ## UML Diagram
 
++-----------------+
+|     GUIFile     |
++-----------------+
+| - lines: std::vector<Line>    |
+| - boxes: std::vector<Box>     |
+| - points: std::vector<Point>  |
+| - outputFile: std::ofstream   |
++-----------------+
+| + addLine(start, end, color)                |
+| + addBox(min, max, color)                   |
+| + addPoint(position, color)                 |
+| + readFile(filename: string): bool          |
+| + getLines(): const std::vector<Line>&      |
+| + getBoxes(): const std::vector<Box>&      |
+| + getPoints(): const std::vector<Point>&   |
+| - parseLineData(data: string)              |
+| - parseBoxData(data: string)               |
+| - parsePointData(data: string)             |
+| - parseVec2(stream: istringstream, vector) |
+| - parseVec3(stream: istringstream, vector) |
+| - writeLineElement(line: Line)             |
+| - writeBoxElement(box: Box)                |
+| - writePointElement(point: Point)          |
+| - openOutputFile()                         |
+| - closeOutputFile()                        |
++-----------------+
+
++---------------------------------+
+|            GUIFile              |
++---------------------------------+
+| Attributes:                     |
+| - lines: vector<Line>           |
+| - boxes: vector<Box>            |
+| - points: vector<Point>         |
+| - outputFile: ofstream          |
++---------------------------------+
+| Methods:                        |
+| + addLine(), addBox(), addPoint() |
+| + readFile(filename: string)    |
+| + getLines(), getBoxes(), getPoints() |
+| - parseLineData(), parseBoxData()|
+| - writeLineElement(), writeBoxElement()|
++---------------------------------+
 
 
 ## Usage Example
