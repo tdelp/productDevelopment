@@ -17,6 +17,9 @@
 class Screen;
 
 // Abstract Base Class for all GUI Elements
+// The Element class provides a common interface (with virtual functions)
+// to ensure all derived classes (like LineElement, BoxElement, etc.) implement
+// their own `draw` and `writeToFile` methods. This promotes polymorphism.
 class Element {
 public:
     virtual ~Element() = default; // Virtual destructor for proper cleanup
@@ -25,6 +28,7 @@ public:
 };
 
 // Concrete Line Class
+// Represents a line element that can be drawn on the screen and written to a file.
 class LineElement : public Element {
 private:
     std::array<float, 2> start;
@@ -32,9 +36,12 @@ private:
     std::array<float, 3> color;
 
 public:
+    // Constructor to initialize a line with start and end points, and a color
     LineElement(const std::array<float, 2>& start, const std::array<float, 2>& end, const std::array<float, 3>& color)
         : start(start), end(end), color(color) {}
 
+    // Draws the line on the screen using the Screen class.
+    // This method abstracts the drawing logic away from the caller.
     void draw(Screen& screen) const override {
         screen.drawSafeLine(
             ivec2(static_cast<int>(std::round(start[0])), static_cast<int>(std::round(start[1]))),
@@ -43,6 +50,8 @@ public:
         );
     }
 
+    // Writes the line data to the output file in XML format.
+    // Each element handles its own file serialization.
     void writeToFile(std::ofstream& outputFile) const override {
         outputFile << "  <line>\n";
         outputFile << "    <vec2>\n";
@@ -63,6 +72,7 @@ public:
 };
 
 // Concrete Box Class
+// Represents a box element, capable of being drawn and written to a file.
 class BoxElement : public Element {
 private:
     std::array<float, 2> min;
@@ -70,9 +80,11 @@ private:
     std::array<float, 3> color;
 
 public:
+    // Constructor to initialize the box with its minimum and maximum coordinates, and color
     BoxElement(const std::array<float, 2>& min, const std::array<float, 2>& max, const std::array<float, 3>& color)
         : min(min), max(max), color(color) {}
 
+    // Draws the box on the screen using the Screen class.
     void draw(Screen& screen) const override {
         screen.drawSafeBox(
             ivec2(static_cast<int>(std::round(min[0])), static_cast<int>(std::round(min[1]))),
@@ -81,6 +93,7 @@ public:
         );
     }
 
+    // Writes the box data to the output file in XML format.
     void writeToFile(std::ofstream& outputFile) const override {
         outputFile << "  <box>\n";
         outputFile << "    <vec2>\n";
@@ -102,15 +115,18 @@ public:
 };
 
 // Concrete Point Class
+// Represents a point element to be drawn and serialized.
 class PointElement : public Element {
 private:
     std::array<float, 2> position;
     std::array<float, 3> color;
 
 public:
+    // Constructor to initialize the position and color of the point
     PointElement(const std::array<float, 2>& position, const std::array<float, 3>& color)
         : position(position), color(color) {}
 
+    // Draws the point on the screen using the Screen class.
     void draw(Screen& screen) const override {
         screen.setSafePixel(
             ivec2(static_cast<int>(std::round(position[0])), static_cast<int>(std::round(position[1]))),
@@ -118,6 +134,7 @@ public:
         );
     }
 
+    // Writes the point data to the output file in XML format.
     void writeToFile(std::ofstream& outputFile) const override {
         outputFile << "  <point>\n";
         outputFile << "    <vec2>\n";
@@ -134,15 +151,18 @@ public:
 };
 
 // Concrete Triangle Class
+// Represents a triangle element that can be drawn and written to a file.
 class TriangleElement : public Element {
 private:
     std::array<float, 2> v0, v1, v2;
     std::array<float, 3> color;
 
 public:
+    // Constructor to initialize the vertices and color of the triangle
     TriangleElement(const std::array<float, 2>& v0, const std::array<float, 2>& v1, const std::array<float, 2>& v2, const std::array<float, 3>& color)
         : v0(v0), v1(v1), v2(v2), color(color) {}
 
+    // Draws the triangle on the screen using the Screen class.
     void draw(Screen& screen) const override {
         screen.drawSafeTriangle(
             ivec2(static_cast<int>(std::round(v0[0])), static_cast<int>(std::round(v0[1]))),
@@ -152,6 +172,7 @@ public:
         );
     }
 
+    // Writes the triangle data to the output file in XML format.
     void writeToFile(std::ofstream& outputFile) const override {
         outputFile << "  <triangle>\n";
         outputFile << "    <vec2>\n";
@@ -176,6 +197,8 @@ public:
 };
 
 // Factory Class for Creating Elements
+// This class abstracts away the creation of the concrete element types (LineElement, BoxElement, etc.)
+// It returns unique pointers to the Element interface, ensuring flexibility and extensibility.
 class ElementFactory {
 public:
     static std::unique_ptr<Element> createLine(const std::array<float, 2>& start, const std::array<float, 2>& end, const std::array<float, 3>& color) {
@@ -196,6 +219,7 @@ public:
 };
 
 // GUIFile Class for Parsing XML and Managing Elements
+// This class manages the parsing, storage, and writing of GUI elements to an XML file.
 class GUIFile {
 private:
     std::vector<std::unique_ptr<Element>> elements;
@@ -209,7 +233,7 @@ private:
         return str.substr(first, (last - first + 1));
     }
 
-    // Improved function to extract all values from a line with multiple tags
+    // Extract values from a line with multiple XML tags
     std::vector<std::string> extractValues(const std::string& line) {
         std::vector<std::string> values;
         std::regex valueRegex(R"(<[^>]+>([^<]+)<\/[^>]+>)");
@@ -218,23 +242,23 @@ private:
 
         for (auto i = begin; i != end; ++i) {
             std::smatch match = *i;
-            values.push_back(trim(match.str(1))); // Extract the value inside the tags
+            values.push_back(trim(match.str(1)));
         }
 
         return values;
     }
 
-    // Safe conversion function for converting a string to a float
+    // Safe string-to-float conversion function
     float safeStringToFloat(const std::string& value) {
         try {
             return std::stof(value);
         } catch (const std::invalid_argument&) {
             std::cerr << "Conversion error: '" << value << "' is not a valid float." << std::endl;
-            return 0.0f; // Default value in case of conversion failure
+            return 0.0f;
         }
     }
 
-    // Improved method to parse a 2D vector element (vec2 or ivec2) with multi-line support
+    // Parse a 2D vector (vec2) from XML
     void parseVec2(std::istringstream& stream, std::array<float, 2>& vector) {
         std::string line;
         bool xFound = false, yFound = false;
@@ -243,15 +267,13 @@ private:
             line = trim(line);
             std::vector<std::string> values = extractValues(line);
 
-            if (!values.empty()) {
-                for (const auto& value : values) {
-                    if (line.find("<x>") != std::string::npos && !xFound) {
-                        vector[0] = safeStringToFloat(value);
-                        xFound = true;
-                    } else if (line.find("<y>") != std::string::npos && !yFound) {
-                        vector[1] = safeStringToFloat(value);
-                        yFound = true;
-                    }
+            for (const auto& value : values) {
+                if (line.find("<x>") != std::string::npos && !xFound) {
+                    vector[0] = safeStringToFloat(value);
+                    xFound = true;
+                } else if (line.find("<y>") != std::string::npos && !yFound) {
+                    vector[1] = safeStringToFloat(value);
+                    yFound = true;
                 }
             }
 
@@ -259,7 +281,7 @@ private:
         }
     }
 
-    // Method to parse a 3D vector element (vec3 or ivec3) with multi-line support
+    // Parse a 3D vector (vec3) from XML
     void parseVec3(std::istringstream& stream, std::array<float, 3>& vector) {
         std::string line;
         bool xFound = false, yFound = false, zFound = false;
@@ -268,18 +290,16 @@ private:
             line = trim(line);
             std::vector<std::string> values = extractValues(line);
 
-            if (!values.empty()) {
-                for (const auto& value : values) {
-                    if (line.find("<x>") != std::string::npos && !xFound) {
-                        vector[0] = safeStringToFloat(value);
-                        xFound = true;
-                    } else if (line.find("<y>") != std::string::npos && !yFound) {
-                        vector[1] = safeStringToFloat(value);
-                        yFound = true;
-                    } else if (line.find("<z>") != std::string::npos && !zFound) {
-                        vector[2] = safeStringToFloat(value);
-                        zFound = true;
-                    }
+            for (const auto& value : values) {
+                if (line.find("<x>") != std::string::npos && !xFound) {
+                    vector[0] = safeStringToFloat(value);
+                    xFound = true;
+                } else if (line.find("<y>") != std::string::npos && !yFound) {
+                    vector[1] = safeStringToFloat(value);
+                    yFound = true;
+                } else if (line.find("<z>") != std::string::npos && !zFound) {
+                    vector[2] = safeStringToFloat(value);
+                    zFound = true;
                 }
             }
 
@@ -370,6 +390,7 @@ public:
         bool capturing = false;
         std::string currentElement;
 
+        // Reading the file line by line, and capturing the elements.
         while (std::getline(file, line)) {
             line = trim(line);
 
@@ -410,6 +431,7 @@ public:
         closeOutputFile();
     }
 
+    // Getter to access all the parsed elements
     const std::vector<std::unique_ptr<Element>>& getElements() const {
         return elements;
     }
