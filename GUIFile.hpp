@@ -1,10 +1,15 @@
-// Element.hpp
-#ifndef __ELEMENT_HPP__
-#define __ELEMENT_HPP__
+#ifndef __GUIFILE_HPP__
+#define __GUIFILE_HPP__
 
+#include <string>
+#include <vector>
+#include <memory>
 #include <fstream>
+#include <regex>
+#include <iostream>
 #include "Screen.hpp"
 
+// Abstract base class for GUI elements
 class Element {
 public:
     virtual ~Element() = default;
@@ -12,55 +17,27 @@ public:
     virtual void writeToFile(std::ofstream& outputFile) const = 0;
 };
 
-#endif // __ELEMENT_HPP__
+// Concrete element classes: Line, Box, Point, Triangle
+class LineElement : public Element { /* ... */ };
+class BoxElement : public Element { /* ... */ };
+class PointElement : public Element { /* ... */ };
+class TriangleElement : public Element { /* ... */ };
 
-// GUIFile.hpp
-#ifndef __GUIFILE_HPP__
-#define __GUIFILE_HPP__
-
-#include "Element.hpp"
-#include <vector>
-#include <memory>
-#include <string>
-#include <fstream>
-
+// GUIFile Class: Handles Parsing and Factory Logic
 class GUIFile {
 private:
     std::vector<std::unique_ptr<Element>> elements;
+    
+    // Parsing functions
+    void parseLine(const std::string& data);
+    void parseBox(const std::string& data);
+    void parsePoint(const std::string& data);
+    void parseTriangle(const std::string& data);
 
 public:
-    bool readFile(const std::string& filename);
-    const std::vector<std::unique_ptr<Element>>& getElements() const { return elements; }
-    void writeFile(const std::string& filename);
+    bool readFile(const std::string& filename); // Parses input file
+    void writeFile(const std::string& filename); // Outputs to file
+    const std::vector<std::unique_ptr<Element>>& getElements() const;
 };
 
 #endif // __GUIFILE_HPP__
-
-// Screen.hpp
-#ifndef __SCREEN_HPP__
-#define __SCREEN_HPP__
-
-#include <SDL2/SDL.h>
-#include <iostream>
-
-class Screen {
-public:
-    unsigned int width, height;
-    SDL_Surface* surface;
-
-    Screen(unsigned int w, unsigned int h, SDL_Surface* surface)
-        : width(w), height(h), surface(surface) {}
-
-    ~Screen() {
-        SDL_FreeSurface(surface);
-    }
-
-    void setSafePixel(int x, int y, Uint32 color) {
-        if (x >= 0 && x < width && y >= 0 && y < height) {
-            Uint32* pixels = (Uint32*)surface->pixels;
-            pixels[y * width + x] = color;
-        }
-    }
-};
-
-#endif // __SCREEN_HPP__
