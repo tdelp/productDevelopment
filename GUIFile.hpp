@@ -175,6 +175,26 @@ public:
     }
 };
 
+// Factory Class for Creating Elements
+class ElementFactory {
+public:
+    static std::unique_ptr<Element> createLine(const std::array<float, 2>& start, const std::array<float, 2>& end, const std::array<float, 3>& color) {
+        return std::make_unique<LineElement>(start, end, color);
+    }
+
+    static std::unique_ptr<Element> createBox(const std::array<float, 2>& min, const std::array<float, 2>& max, const std::array<float, 3>& color) {
+        return std::make_unique<BoxElement>(min, max, color);
+    }
+
+    static std::unique_ptr<Element> createPoint(const std::array<float, 2>& position, const std::array<float, 3>& color) {
+        return std::make_unique<PointElement>(position, color);
+    }
+
+    static std::unique_ptr<Element> createTriangle(const std::array<float, 2>& v0, const std::array<float, 2>& v1, const std::array<float, 2>& v2, const std::array<float, 3>& color) {
+        return std::make_unique<TriangleElement>(v0, v1, v2, color);
+    }
+};
+
 // GUIFile Class for Parsing XML and Managing Elements
 class GUIFile {
 private:
