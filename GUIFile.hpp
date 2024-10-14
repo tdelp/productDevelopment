@@ -62,12 +62,92 @@ public:
     }
 };
 
+// Concrete Box Class
+class BoxElement : public Element {
+private:
+    std::array<float, 2> min;
+    std::array<float, 2> max;
+    std::array<float, 3> color;
+
+public:
+    BoxElement(const std::array<float, 2>& min, const std::array<float, 2>& max, const std::array<float, 3>& color)
+        : min(min), max(max), color(color) {}
+
+    void draw(Screen& screen) const override {
+        screen.drawSafeBox(
+            ivec2(static_cast<int>(std::round(min[0])), static_cast<int>(std::round(min[1]))),
+            ivec2(static_cast<int>(std::round(max[0])), static_cast<int>(std::round(max[1]))),
+            ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
+        );
+    }
+
+    void writeToFile(std::ofstream& outputFile) const override {
+        outputFile << "  <box>\n";
+        outputFile << "    <vec2>\n";
+        outputFile << "      <x>" << min[0] << "</x>\n";
+        outputFile << "      <y>" << min[1] << "</y>\n";
+        outputFile << "    </vec2>\n";
+        outputFile << "    <vec2>\n";
+        outputFile << "      <x>" << max[0] << "</x>\n";
+        outputFile << "      <y>" << max[1] << "</y>\n";
+        outputFile << "    </vec2>\n";
+        outputFile << "    <vec3>\n";
+        outputFile << "      <x>" << color[0] << "</x>\n";
+        outputFile << "      <y>" << color[1] << "</y>\n";
+        outputFile << "      <z>" << color[2] << "</z>\n";
+        outputFile << "    </vec3>\n";
+        outputFile << "  </box>\n";
+
+    }
+};
+
+// Concrete Point Class
+class PointElement : public Element {
+private:
+    std::array<float, 2> position;
+    std::array<float, 3> color;
+
+public:
+    PointElement(const std::array<float, 2>& position, const std::array<float, 3>& color)
+        : position(position), color(color) {}
+
+    void draw(Screen& screen) const override {
+        screen.setSafePixel(
+            ivec2(static_cast<int>(std::round(position[0])), static_cast<int>(std::round(position[1]))),
+            ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
+        );
+    }
+
+    void writeToFile(std::ofstream& outputFile) const override {
+        outputFile << "  <point>\n";
+        outputFile << "    <vec2>\n";
+        outputFile << "      <x>" << position[0] << "</x>\n";
+        outputFile << "      <y>" << position[1] << "</y>\n";
+        outputFile << "    </vec2>\n";
+        outputFile << "    <vec3>\n";
+        outputFile << "      <x>" << color[0] << "</x>\n";
+        outputFile << "      <y>" << color[1] << "</y>\n";
+        outputFile << "      <z>" << color[2] << "</z>\n";
+        outputFile << "    </vec3>\n";
+        outputFile << "  </point>\n";
+    }
+};
+
 // Factory Class for Creating Elements
 class ElementFactory {
 public:
     static std::unique_ptr<Element> createLine(const std::array<float, 2>& start, const std::array<float, 2>& end, const std::array<float, 3>& color) {
         return std::make_unique<LineElement>(start, end, color);
     }
+
+    static std::unique_ptr<Element> createBox(const std::array<float, 2>& min, const std::array<float, 2>& max, const std::array<float, 3>& color) {
+        return std::make_unique<BoxElement>(min, max, color);
+    }
+
+    static std::unique_ptr<Element> createPoint(const std::array<float, 2>& position, const std::array<float, 3>& color) {
+        return std::make_unique<PointElement>(position, color);
+    }
+
 };
 
 // GUIFile Class for Parsing XML and Managing Elements
@@ -173,6 +253,48 @@ private:
         parseVec3(stream, color);
 
         elements.push_back(ElementFactory::createLine(start, end, color));
+    }
+
+    // Function to parse and extract data for box elements
+    void parseBoxData(const std::string& data) {
+        std::istringstream stream(data);
+        std::array<float, 2> min, max;
+        std::array<float, 3> color;
+
+        parseVec2(stream, min);
+        parseVec2(stream, max);
+        parseVec3(stream, color);
+
+        elements.push_back(ElementFactory::createBox(min, max, color));
+    }
+
+    // Function to parse and extract data for point elements
+    void parsePointData(const std::string& data) {
+        std::istringstream stream(data);
+        std::array<float, 2> position;
+        std::array<float, 3> color;
+
+        parseVec2(stream, position);
+        parseVec3(stream, color);
+
+        elements.push_back(ElementFactory::createPoint(position, color));
+    }
+
+    // Methods to open and close the output file
+    void openOutputFile() {
+        outputFile.open("output.xml");
+        if (outputFile.is_open()) {
+            outputFile << "<layout>\n";
+        } else {
+            std::cerr << "Error opening output file for writing." << std::endl;
+        }
+    }
+
+    void closeOutputFile() {
+        if (outputFile.is_open()) {
+            outputFile << "</layout>\n";
+            outputFile.close();
+        }
     }
 
 public:
