@@ -133,21 +133,46 @@ public:
     }
 };
 
-// Factory Class for Creating Elements
-class ElementFactory {
+// Concrete Triangle Class
+class TriangleElement : public Element {
+private:
+    std::array<float, 2> v0, v1, v2;
+    std::array<float, 3> color;
+
 public:
-    static std::unique_ptr<Element> createLine(const std::array<float, 2>& start, const std::array<float, 2>& end, const std::array<float, 3>& color) {
-        return std::make_unique<LineElement>(start, end, color);
+    TriangleElement(const std::array<float, 2>& v0, const std::array<float, 2>& v1, const std::array<float, 2>& v2, const std::array<float, 3>& color)
+        : v0(v0), v1(v1), v2(v2), color(color) {}
+
+    void draw(Screen& screen) const override {
+        screen.drawSafeTriangle(
+            ivec2(static_cast<int>(std::round(v0[0])), static_cast<int>(std::round(v0[1]))),
+            ivec2(static_cast<int>(std::round(v1[0])), static_cast<int>(std::round(v1[1]))),
+            ivec2(static_cast<int>(std::round(v2[0])), static_cast<int>(std::round(v2[1]))),
+            ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
+        );
     }
 
-    static std::unique_ptr<Element> createBox(const std::array<float, 2>& min, const std::array<float, 2>& max, const std::array<float, 3>& color) {
-        return std::make_unique<BoxElement>(min, max, color);
+    void writeToFile(std::ofstream& outputFile) const override {
+        outputFile << "  <triangle>\n";
+        outputFile << "    <vec2>\n";
+        outputFile << "      <x>" << v0[0] << "</x>\n";
+        outputFile << "      <y>" << v0[1] << "</y>\n";
+        outputFile << "    </vec2>\n";
+        outputFile << "    <vec2>\n";
+        outputFile << "      <x>" << v1[0] << "</x>\n";
+        outputFile << "      <y>" << v1[1] << "</y>\n";
+        outputFile << "    </vec2>\n";
+        outputFile << "    <vec2>\n";
+        outputFile << "      <x>" << v2[0] << "</x>\n";
+        outputFile << "      <y>" << v2[1] << "</y>\n";
+        outputFile << "    </vec2>\n";
+        outputFile << "    <vec3>\n";
+        outputFile << "      <x>" << color[0] << "</x>\n";
+        outputFile << "      <y>" << color[1] << "</y>\n";
+        outputFile << "      <z>" << color[2] << "</z>\n";
+        outputFile << "    </vec3>\n";
+        outputFile << "  </triangle>\n";
     }
-
-    static std::unique_ptr<Element> createPoint(const std::array<float, 2>& position, const std::array<float, 3>& color) {
-        return std::make_unique<PointElement>(position, color);
-    }
-
 };
 
 // GUIFile Class for Parsing XML and Managing Elements
@@ -278,6 +303,20 @@ private:
         parseVec3(stream, color);
 
         elements.push_back(ElementFactory::createPoint(position, color));
+    }
+
+    // Function to parse and extract data for triangle elements
+    void parseTriangleData(const std::string& data) {
+        std::istringstream stream(data);
+        std::array<float, 2> v0, v1, v2;
+        std::array<float, 3> color;
+
+        parseVec2(stream, v0);
+        parseVec2(stream, v1);
+        parseVec2(stream, v2);
+        parseVec3(stream, color);
+
+        elements.push_back(ElementFactory::createTriangle(v0, v1, v2, color));
     }
 
     // Methods to open and close the output file
