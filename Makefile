@@ -1,4 +1,4 @@
-# Makefile for SDL2 project
+# Makefile for the XML GUI Testing Project
 
 # Compiler and flags
 CXX = g++
@@ -7,9 +7,9 @@ CXXFLAGS = -Wall -std=c++17
 # SDL2 linking
 SDL2_LIBS = -lSDL2
 
-# Source files and executable name
-SRCS = sdl.cpp
-EXEC = sdl
+# Source files
+SRCS = test_gui_file.cpp 
+EXEC = test
 
 # Default target
 all: $(EXEC)
@@ -20,4 +20,4 @@ $(EXEC): $(SRCS)
 
 # Clean up the build
 clean:
-	rm -f $(EXEC)
+	rm -f $(EXEC) output.xml
