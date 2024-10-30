@@ -1,65 +1,262 @@
 <layout>
+  <!-- Bounding Box for Entire Grid, Centered Horizontally -->
   <line>
     <vec2>
-      <x>50.5</x>
-      <y>500.47</y>
+      <x>125</x>
+      <y>20</y>
     </vec2>
     <vec2>
-      <x>75.6</x>
-      <y>550.6</y>
+      <x>1105</x>
+      <y>20</y>
     </vec2>
     <vec3>
-      <x>244.0</x>
-      <y>245.0</y>
-      <z>103.3</z>
+      <x>200</x>
+      <y>200</x>
+      <z>200</z>
     </vec3>
   </line>
 
+  <line>
+    <vec2>
+      <x>1105</x>
+      <y>20</y>
+    </vec2>
+    <vec2>
+      <x>1105</x>
+      <y>680</y>
+    </vec2>
+    <vec3>
+      <x>200</x>
+      <y>200</x>
+      <z>200</z>
+    </vec3>
+  </line>
+
+  <line>
+    <vec2>
+      <x>125</x>
+      <y>680</y>
+    </vec2>
+    <vec2>
+      <x>1105</x>
+      <y>680</y>
+    </vec2>
+    <vec3>
+      <x>200</x>
+      <y>200</x>
+      <z>200</z>
+    </vec3>
+  </line>
+
+  <line>
+    <vec2>
+      <x>125</x>
+      <y>20</y>
+    </vec2>
+    <vec2>
+      <x>125</x>
+      <y>680</y>
+    </vec2>
+    <vec3>
+      <x>200</x>
+      <y>200</x>
+      <z>200</z>
+    </vec3>
+  </line>
+
+  <!-- Column Separator Lines, Centered -->
+  <line>
+    <vec2>
+      <x>475</x>
+      <y>20</y>
+    </vec2>
+    <vec2>
+      <x>475</x>
+      <y>680</y>
+    </vec2>
+    <vec3>
+      <x>150</x>
+      <y>150</x>
+      <z>150</z>
+    </vec3>
+  </line>
+
+  <line>
+    <vec2>
+      <x>795</x>
+      <y>20</y>
+    </vec2>
+    <vec2>
+      <x>795</x>
+      <y>680</y>
+    </vec2>
+    <vec3>
+      <x>150</x>
+      <y>150</x>
+      <z>150</z>
+    </vec3>
+  </line>
+
+  <!-- Row 1 -->
   <box>
     <vec2>
-      <x>250.3</x>
-      <y>122.5</y>
+      <x>175</x>
+      <y>60</y>
     </vec2>
     <vec2>
-      <x>420.34</x>
-      <y>254.9</y>
-    </vec2>
-    <ivec3>
-      <x>212</x>
-      <y>22</x>
-      <z>124</z>
-    </ivec3>
-  </box>
-
-  <point>
-    <ivec2>
-      <x>480</x>
-      <y>270</y>
-    </ivec2>
-    <ivec3>
-      <x>67</x>
-      <y>200</y>
-      <z>142</z>
-    </ivec3>
-  </point>
-
-  <triangle>
-    <vec2>
-      <x>100</x>
-      <y>100</y>
-    </vec2>
-    <vec2>
-      <x>200</x>
-      <y>100</y>
-    </vec2>
-    <vec2>
-      <x>150</x>
+      <x>375</x>
       <y>200</y>
     </vec2>
     <vec3>
-      <x>0</x>
+      <x>120</x>
+      <y>180</x>
+      <z>240</z>
+    </vec3>
+  </box>
+
+  <triangle>
+    <vec2>
+      <x>535</x>
+      <y>60</y>
+    </vec2>
+    <vec2>
+      <x>635</x>
+      <y>60</y>
+    </vec2>
+    <vec2>
+      <x>585</x>
+      <y>200</y>
+    </vec2>
+    <vec3>
+      <x>255</x>
+      <y>100</x>
+      <z>50</z>
+    </vec3>
+  </triangle>
+
+  <box>
+    <vec2>
+      <x>825</x>
+      <y>60</y>
+    </vec2>
+    <vec2>
+      <x>1025</x>
+      <y>200</y>
+    </vec2>
+    <vec3>
+      <x>60</x>
+      <y>120</x>
+      <z>240</z>
+    </vec3>
+  </box>
+
+  <!-- Row 2 -->
+  <triangle>
+    <vec2>
+      <x>220</x>
+      <y>280</y>
+    </vec2>
+    <vec2>
+      <x>320</x>
+      <y>280</y>
+    </vec2>
+    <vec2>
+      <x>270</x>
+      <y>420</y>
+    </vec2>
+    <vec3>
+      <x>200</x>
+      <y>50</x>
+      <z>100</z>
+    </vec3>
+  </triangle>
+
+  <box>
+    <vec2>
+      <x>535</x>
+      <y>280</y>
+    </vec2>
+    <vec2>
+      <x>735</x>
+      <y>420</y>
+    </vec2>
+    <vec3>
+      <x>50</x>
+      <y>200</x>
+      <z>100</z>
+    </vec3>
+  </box>
+
+  <triangle>
+    <vec2>
+      <x>825</x>
+      <y>280</y>
+    </vec2>
+    <vec2>
+      <x>925</x>
+      <y>280</y>
+    </vec2>
+    <vec2>
+      <x>875</x>
+      <y>420</y>
+    </vec2>
+    <vec3>
+      <x>255</x>
       <y>255</x>
       <z>0</z>
     </vec3>
   </triangle>
+
+  <!-- Row 3 -->
+  <box>
+    <vec2>
+      <x>175</x>
+      <y>500</y>
+    </vec2>
+    <vec2>
+      <x>375</x>
+      <y>640</y>
+    </vec2>
+    <vec3>
+      <x>150</x>
+      <y>255</x>
+      <z>150</z>
+    </vec3>
+  </box>
+
+  <triangle>
+    <vec2>
+      <x>535</x>
+      <y>500</y>
+    </vec2>
+    <vec2>
+      <x>635</x>
+      <y>500</y>
+    </vec2>
+    <vec2>
+      <x>585</x>
+      <y>640</y>
+    </vec2>
+    <vec3>
+      <x>0</x>
+      <y>200</x>
+      <z>255</z>
+    </vec3>
+  </triangle>
+
+  <box>
+    <vec2>
+      <x>825</x>
+      <y>500</y>
+    </vec2>
+    <vec2>
+      <x>1025</x>
+      <y>640</y>
+    </vec2>
+    <vec3>
+      <x>200</x>
+      <y>100</x>
+      <z>200</z>
+    </vec3>
+  </box>
 </layout>
