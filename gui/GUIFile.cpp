@@ -116,3 +116,12 @@ std::unique_ptr<Element> ElementFactory::createPoint(const std::array<float, 2>&
 std::unique_ptr<Element> ElementFactory::createTriangle(const std::array<float, 2>& v0, const std::array<float, 2>& v1, const std::array<float, 2>& v2, const std::array<float, 3>& color) {
     return std::make_unique<TriangleElement>(v0, v1, v2, color);
 }
+void Layout::calculatePosition(const ivec2& parentStart, const ivec2& parentEnd) {
+    ivec2 space = parentEnd - parentStart;
+    start = ivec2(static_cast<int>(sX * space.x), static_cast<int>(sY * space.y)) + parentStart;
+    end = ivec2(static_cast<int>(eX * space.x), static_cast<int>(eY * space.y)) + parentStart;
+
+    for (auto& nestedLayout : nestedLayouts) {
+        nestedLayout->calculatePosition(start, end);
+    }
+}
