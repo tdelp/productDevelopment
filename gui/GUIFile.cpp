@@ -1,88 +1,62 @@
 #include "gui.hpp"
 #include <cmath>
-#include <iostream>
 
+// Implementation of LineElement
 LineElement::LineElement(const std::array<float, 2>& start, const std::array<float, 2>& end, const std::array<float, 3>& color)
     : start(start), end(end), color(color) {}
 
-void LineElement::draw(Screen& screen) const {
+void LineElement::draw(Screen& screen, const ivec2& offset) const {
     screen.drawSafeLine(
-        ivec2(static_cast<int>(std::round(start[0])), static_cast<int>(std::round(start[1]))),
-        ivec2(static_cast<int>(std::round(end[0])), static_cast<int>(std::round(end[1]))),
+        ivec2(static_cast<int>(std::round(start[0])) + offset.x, static_cast<int>(std::round(start[1])) + offset.y),
+        ivec2(static_cast<int>(std::round(end[0])) + offset.x, static_cast<int>(std::round(end[1])) + offset.y),
         ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
     );
 }
 
-void LineElement::writeToFile(std::ofstream& outputFile) const {
-    outputFile << "  <line>\n";
-    outputFile << "    <vec2><x>" << start[0] << "</x><y>" << start[1] << "</y></vec2>\n";
-    outputFile << "    <vec2><x>" << end[0] << "</x><y>" << end[1] << "</y></vec2>\n";
-    outputFile << "    <vec3><x>" << color[0] << "</x><y>" << color[1] << "</y><z>" << color[2] << "</z></vec3>\n";
-    outputFile << "  </line>\n";
-}
-
+// Implementation of BoxElement
 BoxElement::BoxElement(const std::array<float, 2>& min, const std::array<float, 2>& max, const std::array<float, 3>& color)
     : min(min), max(max), color(color) {}
 
-void BoxElement::draw(Screen& screen) const {
+void BoxElement::draw(Screen& screen, const ivec2& offset) const {
     screen.drawSafeBox(
-        ivec2(static_cast<int>(std::round(min[0])), static_cast<int>(std::round(min[1]))),
-        ivec2(static_cast<int>(std::round(max[0])), static_cast<int>(std::round(max[1]))),
+        ivec2(static_cast<int>(std::round(min[0])) + offset.x, static_cast<int>(std::round(min[1])) + offset.y),
+        ivec2(static_cast<int>(std::round(max[0])) + offset.x, static_cast<int>(std::round(max[1])) + offset.y),
         ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
     );
 }
+
 bool BoxElement::isInside(const ivec2& point) const {
     return (point.x >= min[0] && point.x <= max[0] && point.y >= min[1] && point.y <= max[1]);
 }
 
-void BoxElement::writeToFile(std::ofstream& outputFile) const {
-    outputFile << "  <box>\n";
-    outputFile << "    <vec2><x>" << min[0] << "</x><y>" << min[1] << "</y></vec2>\n";
-    outputFile << "    <vec2><x>" << max[0] << "</x><y>" << max[1] << "</y></vec2>\n";
-    outputFile << "    <vec3><x>" << color[0] << "</x><y>" << color[1] << "</y><z>" << color[2] << "</z></vec3>\n";
-    outputFile << "  </box>\n";
-}
-
+// Implementation of PointElement
 PointElement::PointElement(const std::array<float, 2>& position, const std::array<float, 3>& color)
     : position(position), color(color) {}
 
-void PointElement::draw(Screen& screen) const {
+void PointElement::draw(Screen& screen, const ivec2& offset) const {
     screen.setSafePixel(
-        ivec2(static_cast<int>(std::round(position[0])), static_cast<int>(std::round(position[1]))),
+        ivec2(static_cast<int>(std::round(position[0])) + offset.x, static_cast<int>(std::round(position[1])) + offset.y),
         ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
     );
 }
+
 bool PointElement::isInside(const ivec2& point) const {
     return (point.x == position[0] && point.y == position[1]);
 }
 
-void PointElement::writeToFile(std::ofstream& outputFile) const {
-    outputFile << "  <point>\n";
-    outputFile << "    <vec2><x>" << position[0] << "</x><y>" << position[1] << "</y></vec2>\n";
-    outputFile << "    <vec3><x>" << color[0] << "</x><y>" << color[1] << "</y><z>" << color[2] << "</z></vec3>\n";
-    outputFile << "  </point>\n";
-}
-
+// Implementation of TriangleElement
 TriangleElement::TriangleElement(const std::array<float, 2>& v0, const std::array<float, 2>& v1, const std::array<float, 2>& v2, const std::array<float, 3>& color)
     : v0(v0), v1(v1), v2(v2), color(color) {}
 
-void TriangleElement::draw(Screen& screen) const {
+void TriangleElement::draw(Screen& screen, const ivec2& offset) const {
     screen.drawSafeTriangle(
-        ivec2(static_cast<int>(std::round(v0[0])), static_cast<int>(std::round(v0[1]))),
-        ivec2(static_cast<int>(std::round(v1[0])), static_cast<int>(std::round(v1[1]))),
-        ivec2(static_cast<int>(std::round(v2[0])), static_cast<int>(std::round(v2[1]))),
+        ivec2(static_cast<int>(std::round(v0[0])) + offset.x, static_cast<int>(std::round(v0[1])) + offset.y),
+        ivec2(static_cast<int>(std::round(v1[0])) + offset.x, static_cast<int>(std::round(v1[1])) + offset.y),
+        ivec2(static_cast<int>(std::round(v2[0])) + offset.x, static_cast<int>(std::round(v2[1])) + offset.y),
         ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
     );
 }
 
-void TriangleElement::writeToFile(std::ofstream& outputFile) const {
-    outputFile << "  <triangle>\n";
-    outputFile << "    <vec2><x>" << v0[0] << "</x><y>" << v0[1] << "</y></vec2>\n";
-    outputFile << "    <vec2><x>" << v1[0] << "</x><y>" << v1[1] << "</y></vec2>\n";
-    outputFile << "    <vec2><x>" << v2[0] << "</x><y>" << v2[1] << "</y></vec2>\n";
-    outputFile << "    <vec3><x>" << color[0] << "</x><y>" << color[1] << "</y><z>" << color[2] << "</z></vec3>\n";
-    outputFile << "  </triangle>\n";
-}
 bool TriangleElement::isInside(const ivec2& point) const {
     // Using cross-product method to check if point is inside triangle
     auto sign = [](const ivec2& p1, const ivec2& p2, const ivec2& p3) {
@@ -141,11 +115,12 @@ void Layout::calculatePosition(const ivec2& parentStart, const ivec2& parentEnd)
 
 void Layout::render(Screen& screen) {
     if (!active) return;
+
     for (const auto& element : elements) {
         element->draw(screen, start);
     }
+
     for (const auto& nestedLayout : nestedLayouts) {
         nestedLayout->render(screen);
     }
 }
- 
