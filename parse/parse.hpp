@@ -1,7 +1,7 @@
 #ifndef __PARSE_HPP__
 #define __PARSE_HPP__
 
-#include "../gui/gui.hpp"
+#include "../gui/GUIFile.hpp"
 #include <fstream>
 #include <iostream>
 #include <memory>

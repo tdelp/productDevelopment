@@ -1,4 +1,4 @@
-#include "gui.hpp"
+#include "GUIFile.hpp"
 #include <cmath>
 
 // Implementation of LineElement
