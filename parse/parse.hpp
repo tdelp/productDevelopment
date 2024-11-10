@@ -1,36 +1,31 @@
 #ifndef __PARSE_HPP__
 #define __PARSE_HPP__
 
-#include "gui.hpp"
-#include <vector>
+#include "../gui/gui.hpp"
 #include <fstream>
-#include <string>
-#include <sstream>
-#include <regex>
+#include <iostream>
 #include <memory>
+#include <string>
 
-class GUIFile {
-    std::vector<std::unique_ptr<Element>> elements;
-    std::ofstream outputFile;
-
-    std::string trim(const std::string& str);
-    std::vector<std::string> extractValues(const std::string& line);
-    float safeStringToFloat(const std::string& value);
-
-    void parseVec2(std::istringstream& stream, std::array<float, 2>& vector);
-    void parseVec3(std::istringstream& stream, std::array<float, 3>& vector);
-    void parseLineData(const std::string& data);
-    void parseBoxData(const std::string& data);
-    void parsePointData(const std::string& data);
-    void parseTriangleData(const std::string& data);
-
-    void openOutputFile();
-    void closeOutputFile();
-
+class Parser {
 public:
-    bool readFile(const std::string& filename);
-    void writeFile();
-    const std::vector<std::unique_ptr<Element>>& getElements() const;
+    Parser(const std::string& fileName);
+    std::unique_ptr<Layout> parseRootLayout();
+
+private:
+    std::string data;  // The entire XML content in a single string for easy parsing
+    void loadFile(const std::string& fileName);
+    
+    // Parse methods
+    std::unique_ptr<Layout> parseLayout(size_t& pos);
+    std::unique_ptr<Element> parseElement(const std::string& type, size_t& pos);
+    
+    // Helper methods to parse specific data
+    std::array<float, 2> parseVec2(size_t& pos);
+    std::array<float, 3> parseVec3(size_t& pos);
+    bool parseBooleanAttribute(const std::string& attributeName, size_t pos, bool defaultValue);
+    
+    size_t findTag(const std::string& tag, size_t pos);
 };
 
 #endif // __PARSE_HPP__

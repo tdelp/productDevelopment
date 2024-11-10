@@ -1,194 +1,129 @@
 #include "parse.hpp"
-#include <iostream>
 
-std::string GUIFile::trim(const std::string& str) {
-    size_t first = str.find_first_not_of(" \t\n\r");
-    size_t last = str.find_last_not_of(" \t\n\r");
-    return (first == std::string::npos) ? "" : str.substr(first, last - first + 1);
+Parser::Parser(const std::string& fileName) {
+    loadFile(fileName);
 }
 
-std::vector<std::string> GUIFile::extractValues(const std::string& line) {
-    std::vector<std::string> values;
-    std::regex valueRegex(R"(<[^>]+>([^<]+)<\/[^>]+>)");
-    auto matches = std::sregex_iterator(line.begin(), line.end(), valueRegex);
-
-    for (auto i = matches; i != std::sregex_iterator(); ++i) {
-        values.push_back(trim(i->str(1)));
-    }
-    return values;
-}
-
-float GUIFile::safeStringToFloat(const std::string& value) {
-    try {
-        return std::stof(value);
-    } catch (...) {
-        std::cerr << "Conversion error: '" << value << "' is not a valid float.\n";
-        return 0.0f;
-    }
-}
-
-void GUIFile::parseVec2(std::istringstream& stream, std::array<float, 2>& vector) {
+void Parser::loadFile(const std::string& fileName) {
+    std::ifstream file(fileName);
     std::string line;
-    bool xFound = false, yFound = false;
-
-    while (std::getline(stream, line)) {
-        line = trim(line);
-        std::vector<std::string> values = extractValues(line);
-
-        for (const auto& value : values) {
-            if (line.find("<x>") != std::string::npos && !xFound) {
-                vector[0] = safeStringToFloat(value);
-                xFound = true;
-            } else if (line.find("<y>") != std::string::npos && !yFound) {
-                vector[1] = safeStringToFloat(value);
-                yFound = true;
-            }
-        }
-
-        if (xFound && yFound) break;
-    }
-}
-
-void GUIFile::parseVec3(std::istringstream& stream, std::array<float, 3>& vector) {
-    std::string line;
-    bool xFound = false, yFound = false, zFound = false;
-
-    while (std::getline(stream, line)) {
-        line = trim(line);
-        std::vector<std::string> values = extractValues(line);
-
-        for (const auto& value : values) {
-            if (line.find("<x>") != std::string::npos && !xFound) {
-                vector[0] = safeStringToFloat(value);
-                xFound = true;
-            } else if (line.find("<y>") != std::string::npos && !yFound) {
-                vector[1] = safeStringToFloat(value);
-                yFound = true;
-            } else if (line.find("<z>") != std::string::npos && !zFound) {
-                vector[2] = safeStringToFloat(value);
-                zFound = true;
-            }
-        }
-
-        if (xFound && yFound && zFound) break;
-    }
-}
-
-void GUIFile::parseLineData(const std::string& data) {
-    std::istringstream stream(data);
-    std::array<float, 2> start, end;
-    std::array<float, 3> color;
-
-    parseVec2(stream, start);
-    parseVec2(stream, end);
-    parseVec3(stream, color);
-
-    elements.push_back(ElementFactory::createLine(start, end, color));
-}
-
-void GUIFile::parseBoxData(const std::string& data) {
-    std::istringstream stream(data);
-    std::array<float, 2> min, max;
-    std::array<float, 3> color;
-
-    parseVec2(stream, min);
-    parseVec2(stream, max);
-    parseVec3(stream, color);
-
-    elements.push_back(ElementFactory::createBox(min, max, color));
-}
-
-void GUIFile::parsePointData(const std::string& data) {
-    std::istringstream stream(data);
-    std::array<float, 2> position;
-    std::array<float, 3> color;
-
-    parseVec2(stream, position);
-    parseVec3(stream, color);
-
-    elements.push_back(ElementFactory::createPoint(position, color));
-}
-
-void GUIFile::parseTriangleData(const std::string& data) {
-    std::istringstream stream(data);
-    std::array<float, 2> v0, v1, v2;
-    std::array<float, 3> color;
-
-    parseVec2(stream, v0);
-    parseVec2(stream, v1);
-    parseVec2(stream, v2);
-    parseVec3(stream, color);
-
-    elements.push_back(ElementFactory::createTriangle(v0, v1, v2, color));
-}
-
-void GUIFile::openOutputFile() {
-    outputFile.open("output.xml");
-    if (outputFile.is_open()) {
-        outputFile << "<layout>\n";
-    } else {
-        std::cerr << "Error opening output file for writing.\n";
-    }
-}
-
-void GUIFile::closeOutputFile() {
-    if (outputFile.is_open()) {
-        outputFile << "</layout>\n";
-        outputFile.close();
-    }
-}
-
-bool GUIFile::readFile(const std::string& filename) {
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Error opening file: " << filename << "\n";
-        return false;
-    }
-
-    std::string line;
-    std::string elementData;
-    bool capturing = false;
-    std::string currentElement;
-
     while (std::getline(file, line)) {
-        line = trim(line);
-
-        if (line == "<line>" || line == "<box>" || line == "<point>" || line == "<triangle>") {
-            capturing = true;
-            currentElement = line;
-            elementData.clear();
-            elementData += line + "\n";
-        }
-        else if (line == "</line>" || line == "</box>" || line == "</point>" || line == "</triangle>") {
-            capturing = false;
-            elementData += line + "\n";
-
-            if (currentElement == "<line>") {
-                parseLineData(elementData);
-            } else if (currentElement == "<box>") {
-                parseBoxData(elementData);
-            } else if (currentElement == "<point>") {
-                parsePointData(elementData);
-            } else if (currentElement == "<triangle>") {
-                parseTriangleData(elementData);
+        for (const char& c : line) {
+            if (!std::isspace(c)) {
+                data += c;
             }
         }
-        else if (capturing) {
-            elementData += line + "\n";
+    }
+}
+
+std::unique_ptr<Layout> Parser::parseRootLayout() {
+    size_t pos = data.find("<layout>");
+    if (pos == std::string::npos) {
+        return nullptr;
+    }
+    pos += std::string("<layout>").size();
+    return parseLayout(pos);
+}
+
+std::unique_ptr<Layout> Parser::parseLayout(size_t& pos) {
+    float sX = 0, sY = 0, eX = 1, eY = 1;
+    bool active = true;
+
+    // Check for 'active' attribute if it exists in the layout tag
+    size_t activePos = data.find("active=", pos);
+    if (activePos != std::string::npos && activePos < data.find(">", pos)) {
+        active = parseBooleanAttribute("active", pos, true);
+    }
+
+    size_t layoutEnd = data.find("</layout>", pos);
+    auto layout = std::make_unique<Layout>(sX, sY, eX, eY, active);
+
+    while (pos < layoutEnd) {
+        size_t boxPos = findTag("<box>", pos);
+        size_t linePos = findTag("<line>", pos);
+        size_t pointPos = findTag("<point>", pos);
+        size_t trianglePos = findTag("<triangle>", pos);
+        size_t nestedLayoutPos = findTag("<layout>", pos);
+
+        if (nestedLayoutPos < layoutEnd && (nestedLayoutPos < boxPos && nestedLayoutPos < linePos &&
+            nestedLayoutPos < pointPos && nestedLayoutPos < trianglePos)) {
+            pos = nestedLayoutPos + std::string("<layout>").size();
+            layout->addNestedLayout(parseLayout(pos));
+        } else if (boxPos < layoutEnd && (boxPos < linePos && boxPos < pointPos && boxPos < trianglePos)) {
+            pos = boxPos + std::string("<box>").size();
+            layout->addElement(parseElement("box", pos));
+        } else if (linePos < layoutEnd && (linePos < pointPos && linePos < trianglePos)) {
+            pos = linePos + std::string("<line>").size();
+            layout->addElement(parseElement("line", pos));
+        } else if (pointPos < layoutEnd && pointPos < trianglePos) {
+            pos = pointPos + std::string("<point>").size();
+            layout->addElement(parseElement("point", pos));
+        } else if (trianglePos < layoutEnd) {
+            pos = trianglePos + std::string("<triangle>").size();
+            layout->addElement(parseElement("triangle", pos));
+        } else {
+            break;
         }
     }
-
-    return true;
+    pos = layoutEnd + std::string("</layout>").size();
+    return layout;
 }
 
-void GUIFile::writeFile() {
-    openOutputFile();
-    for (const auto& element : elements) {
-        element->writeToFile(outputFile);
+std::unique_ptr<Element> Parser::parseElement(const std::string& type, size_t& pos) {
+    if (type == "box") {
+        auto min = parseVec2(pos);
+        auto max = parseVec2(pos);
+        auto color = parseVec3(pos);
+        return ElementFactory::createBox(min, max, color);
+    } else if (type == "line") {
+        auto start = parseVec2(pos);
+        auto end = parseVec2(pos);
+        auto color = parseVec3(pos);
+        return ElementFactory::createLine(start, end, color);
+    } else if (type == "point") {
+        auto position = parseVec2(pos);
+        auto color = parseVec3(pos);
+        return ElementFactory::createPoint(position, color);
+    } else if (type == "triangle") {
+        auto v0 = parseVec2(pos);
+        auto v1 = parseVec2(pos);
+        auto v2 = parseVec2(pos);
+        auto color = parseVec3(pos);
+        return ElementFactory::createTriangle(v0, v1, v2, color);
     }
-    closeOutputFile();
+    return nullptr;
 }
 
-const std::vector<std::unique_ptr<Element>>& GUIFile::getElements() const {
-    return elements;
+std::array<float, 2> Parser::parseVec2(size_t& pos) {
+    std::array<float, 2> vec;
+    pos = data.find("<x>", pos) + 3;
+    vec[0] = std::stof(data.substr(pos, data.find("</x>", pos) - pos));
+    pos = data.find("<y>", pos) + 3;
+    vec[1] = std::stof(data.substr(pos, data.find("</y>", pos) - pos));
+    return vec;
+}
+
+std::array<float, 3> Parser::parseVec3(size_t& pos) {
+    std::array<float, 3> vec;
+    pos = data.find("<x>", pos) + 3;
+    vec[0] = std::stof(data.substr(pos, data.find("</x>", pos) - pos));
+    pos = data.find("<y>", pos) + 3;
+    vec[1] = std::stof(data.substr(pos, data.find("</y>", pos) - pos));
+    pos = data.find("<z>", pos) + 3;
+    vec[2] = std::stof(data.substr(pos, data.find("</z>", pos) - pos));
+    return vec;
+}
+
+bool Parser::parseBooleanAttribute(const std::string& attributeName, size_t pos, bool defaultValue) {
+    size_t attrPos = data.find(attributeName + "=\"", pos);
+    if (attrPos != std::string::npos && attrPos < data.find(">", pos)) {
+        attrPos += attributeName.size() + 2;
+        std::string value = data.substr(attrPos, data.find("\"", attrPos) - attrPos);
+        return (value == "true");
+    }
+    return defaultValue;
+}
+
+size_t Parser::findTag(const std::string& tag, size_t pos) {
+    return data.find(tag, pos);
 }
