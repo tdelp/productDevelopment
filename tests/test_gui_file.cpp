@@ -1,96 +1,80 @@
-#include "GUIFile.hpp"
-#include "Screen.hpp"
+#include "../parse/parse.hpp"          // Include for the Parser class
+#include "../screen/Screen.hpp"
 #include <SDL2/SDL.h>
-#include <iostream>
-#include <cmath> // Include cmath for the round function
+#include <cmath> // For std::round
 
 int main(int argc, char* argv[]) {
-    // Initialize SDL and create a window
+    // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        std::cerr << "SDL Initialization failed: " << SDL_GetError() << std::endl;
         return 1;
     }
 
-    // Create a window with a default size of 1280x720
-    SDL_Window* window = SDL_CreateWindow("GUI Element Display", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN);
+    // Create an SDL window and Screen object
+    SDL_Window* window = SDL_CreateWindow("Dynamic GUI Layout",
+                                          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                          1280, 720, SDL_WINDOW_SHOWN);
     if (!window) {
-        std::cerr << "Failed to create window: " << SDL_GetError() << std::endl;
         SDL_Quit();
         return 1;
     }
 
     SDL_Surface* windowSurface = SDL_GetWindowSurface(window);
+    SDL_Surface* screenSurface = SDL_CreateRGBSurface(0, 1280, 720, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0);
+    Screen screen(1280, 720, screenSurface);
 
-    // Create the Screen object with a size of 1280x720
-    Screen screen(1280, 720, SDL_CreateRGBSurface(0, 1280, 720, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0));
-
-    // Load and parse the XML file with GUI elements
-    GUIFile guiFile;
-    if (!guiFile.readFile("input.xml")) {
-        std::cerr << "Failed to read and parse XML file" << std::endl;
+    // Initialize Parser and load the root layout from XML
+    Parser parser("input.xml");  // Assuming the XML file is named "input.xml"
+    auto rootLayout = parser.parseRootLayout();
+    
+    if (!rootLayout) {
         SDL_DestroyWindow(window);
         SDL_Quit();
         return 1;
     }
 
-    // Clear the screen before drawing by filling it with a black color
-    SDL_FillRect(screen.surface, NULL, SDL_MapRGB(screen.surface->format, 0, 0, 0)); 
+    // Calculate initial positions for root and nested layouts
+    rootLayout->calculatePosition({0, 0}, {1280, 720});
 
-    // Render parsed lines to the screen with debugging output
-    for (const auto& line : guiFile.getLines()) {
-        int startX = static_cast<int>(std::round(line.start[0]));
-        int startY = static_cast<int>(std::round(line.start[1]));
-        int endX = static_cast<int>(std::round(line.end[0]));
-        int endY = static_cast<int>(std::round(line.end[1]));
-        int colorR = static_cast<int>(std::round(line.color[0]));
-        int colorG = static_cast<int>(std::round(line.color[1]));
-        int colorB = static_cast<int>(std::round(line.color[2]));
-
-        // Draw the line using the safe function
-        screen.drawSafeLine(
-            ivec2(startX, startY),
-            ivec2(endX, endY),
-            ivec3(colorR, colorG, colorB)
-        );
-    }
-
-    // Render parsed boxes to the screen using the safe drawing function
-    for (const auto& box : guiFile.getBoxes()) {
-        screen.drawSafeBox(
-            ivec2(static_cast<int>(std::round(box.min[0])), static_cast<int>(std::round(box.min[1]))),
-            ivec2(static_cast<int>(std::round(box.max[0])), static_cast<int>(std::round(box.max[1]))),
-            ivec3(static_cast<int>(std::round(box.color[0])), static_cast<int>(std::round(box.color[1])), static_cast<int>(std::round(box.color[2])))
-        );
-    }
-
-    // Render parsed points to the screen using the safe pixel function
-    for (const auto& point : guiFile.getPoints()) {
-        screen.setSafePixel(
-            ivec2(static_cast<int>(std::round(point.position[0])), static_cast<int>(std::round(point.position[1]))),
-            ivec3(static_cast<int>(std::round(point.color[0])), static_cast<int>(std::round(point.color[1])), static_cast<int>(std::round(point.color[2])))
-        );
-    }
-
-    // Blit the screen surface to the window surface
-    screen.blitTo(windowSurface);
-
-    // Update the window surface to display the drawn elements
-    SDL_UpdateWindowSurface(window);
-
-    // Event loop to keep the window open and handle SDL events
+    // Main SDL loop with mouse interaction to toggle nested layout activation
     bool running = true;
     SDL_Event event;
     while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                running = false; // Break the loop if the user closes the window
+        // Clear screen buffer
+        SDL_FillRect(screen.surface, NULL, SDL_MapRGB(screen.surface->format, 0, 0, 0));
+
+        // Get mouse position
+        int x, y;
+        SDL_GetMouseState(&x, &y);
+
+        // Check if mouse is inside the first element of the root layout (assuming first element is a triangle)
+        if (!rootLayout->getElements().empty()) {
+            bool mouseInsideFirstElement = rootLayout->getElements()[0]->isInside({x, y});
+
+            // Toggle the first nested layout based on mouse position
+            if (!rootLayout->getNestedLayouts().empty()) {
+                auto& nestedLayout = rootLayout->getNestedLayouts()[0];
+                nestedLayout->setActive(mouseInsideFirstElement);
             }
         }
-        SDL_Delay(16); // Control the loop speed to avoid high CPU usage
+
+        // Render the root layout and its nested layouts based on active state
+        rootLayout->render(screen);
+
+        // Blit the rendered screen surface to the window surface and update the window
+        screen.blitTo(windowSurface);
+        SDL_UpdateWindowSurface(window);
+
+        // Poll for quit event
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) running = false;
+        }
+
+        SDL_Delay(16); // Delay for 60 FPS
     }
 
-    // Clean up SDL resources
+    // Cleanup SDL window and quit
     SDL_DestroyWindow(window);
     SDL_Quit();
+
     return 0;
 }
