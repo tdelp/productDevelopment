@@ -22,22 +22,12 @@ std::unique_ptr<Layout> Parser::parseRootLayout() {
         return nullptr;
     }
     pos += std::string("<layout>").size();
-    return parseLayout(pos);
-}
 
-std::unique_ptr<Layout> Parser::parseLayout(size_t& pos) {
-    float sX = 0, sY = 0, eX = 1, eY = 1;
-    bool active = true;
+    // Create the root layout with full-screen dimensions (sX=0, sY=0, eX=1, eY=1)
+    auto rootLayout = std::make_unique<Layout>(0, 0, 1, 1, true);
 
-    // Check for 'active' attribute if it exists in the layout tag
-    size_t activePos = data.find("active=", pos);
-    if (activePos != std::string::npos && activePos < data.find(">", pos)) {
-        active = parseBooleanAttribute("active", pos, true);
-    }
-
+    // Parse child elements within the root layout
     size_t layoutEnd = data.find("</layout>", pos);
-    auto layout = std::make_unique<Layout>(sX, sY, eX, eY, active);
-
     while (pos < layoutEnd) {
         size_t boxPos = findTag("<box>", pos);
         size_t linePos = findTag("<line>", pos);
@@ -48,26 +38,127 @@ std::unique_ptr<Layout> Parser::parseLayout(size_t& pos) {
         if (nestedLayoutPos < layoutEnd && (nestedLayoutPos < boxPos && nestedLayoutPos < linePos &&
             nestedLayoutPos < pointPos && nestedLayoutPos < trianglePos)) {
             pos = nestedLayoutPos + std::string("<layout>").size();
-            layout->addNestedLayout(parseLayout(pos));
+            std::cout << "Parsing nested layout at position: " << pos << std::endl;
+            rootLayout->addNestedLayout(parseLayout(pos)); // Parse as nested layout with offsets
         } else if (boxPos < layoutEnd && (boxPos < linePos && boxPos < pointPos && boxPos < trianglePos)) {
             pos = boxPos + std::string("<box>").size();
-            layout->addElement(parseElement("box", pos));
+            std::cout << "Parsing box element at position: " << pos << std::endl;
+            rootLayout->addElement(parseElement("box", pos));
         } else if (linePos < layoutEnd && (linePos < pointPos && linePos < trianglePos)) {
             pos = linePos + std::string("<line>").size();
-            layout->addElement(parseElement("line", pos));
+            std::cout << "Parsing line element at position: " << pos << std::endl;
+            rootLayout->addElement(parseElement("line", pos));
         } else if (pointPos < layoutEnd && pointPos < trianglePos) {
             pos = pointPos + std::string("<point>").size();
-            layout->addElement(parseElement("point", pos));
+            std::cout << "Parsing point element at position: " << pos << std::endl;
+            rootLayout->addElement(parseElement("point", pos));
         } else if (trianglePos < layoutEnd) {
             pos = trianglePos + std::string("<triangle>").size();
-            layout->addElement(parseElement("triangle", pos));
+            std::cout << "Parsing triangle element at position: " << pos << std::endl;
+            rootLayout->addElement(parseElement("triangle", pos));
         } else {
             break;
         }
     }
     pos = layoutEnd + std::string("</layout>").size();
+    std::cout << "Finished parsing root layout. New position after </layout>: " << pos << std::endl;
+
+    return rootLayout;
+}
+
+std::unique_ptr<Layout> Parser::parseLayout(size_t& pos) {
+    // Parse offsets only for nested layouts
+    float sX = 0, sY = 0, eX = 1, eY = 1;
+    bool active = true;
+
+    std::cout << "Starting parseLayout at position: " << pos << std::endl;
+    std::cout << "Default layout attributes - sX: " << sX << ", sY: " << sY << ", eX: " << eX << ", eY: " << eY << ", active: " << active << std::endl;
+
+    size_t layoutEnd = data.find("</layout>", pos);
+
+    // Parse sX, sY, eX, eY values if they are specified for nested layout
+    size_t sXPos = data.find("<sX>", pos);
+    if (sXPos != std::string::npos && sXPos < layoutEnd) {
+        sXPos += 4;
+        sX = std::stof(data.substr(sXPos, data.find("</sX>", sXPos) - sXPos));
+        std::cout << "Parsed sX: " << sX << std::endl;
+    }
+
+    size_t sYPos = data.find("<sY>", pos);
+    if (sYPos != std::string::npos && sYPos < layoutEnd) {
+        sYPos += 4;
+        sY = std::stof(data.substr(sYPos, data.find("</sY>", sYPos) - sYPos));
+        std::cout << "Parsed sY: " << sY << std::endl;
+    }
+
+    size_t eXPos = data.find("<eX>", pos);
+    if (eXPos != std::string::npos && eXPos < layoutEnd) {
+        eXPos += 4;
+        eX = std::stof(data.substr(eXPos, data.find("</eX>", eXPos) - eXPos));
+        std::cout << "Parsed eX: " << eX << std::endl;
+    }
+
+    size_t eYPos = data.find("<eY>", pos);
+    if (eYPos != std::string::npos && eYPos < layoutEnd) {
+        eYPos += 4;
+        eY = std::stof(data.substr(eYPos, data.find("</eY>", eYPos) - eYPos));
+        std::cout << "Parsed eY: " << eY << std::endl;
+    }
+
+    // Parse 'active' attribute if it exists in the layout tag
+    size_t activePos = data.find("active=", pos);
+    if (activePos != std::string::npos && activePos < data.find(">", pos)) {
+        active = parseBooleanAttribute("active", pos, true);
+    }
+
+    std::cout << "Parsed active attribute: " << active << std::endl;
+
+    auto layout = std::make_unique<Layout>(sX, sY, eX, eY, active);
+
+    std::cout << "End of current layout tag found at position: " << layoutEnd << std::endl;
+
+    // Parsing child elements within the nested layout
+    while (pos < layoutEnd) {
+        size_t boxPos = findTag("<box>", pos);
+        size_t linePos = findTag("<line>", pos);
+        size_t pointPos = findTag("<point>", pos);
+        size_t trianglePos = findTag("<triangle>", pos);
+        size_t nestedLayoutPos = findTag("<layout>", pos);
+
+        if (nestedLayoutPos < layoutEnd && (nestedLayoutPos < boxPos && nestedLayoutPos < linePos &&
+            nestedLayoutPos < pointPos && nestedLayoutPos < trianglePos)) {
+            pos = nestedLayoutPos + std::string("<layout>").size();
+            std::cout << "Parsing nested layout at position: " << pos << std::endl;
+            layout->addNestedLayout(parseLayout(pos));
+        } else if (boxPos < layoutEnd && (boxPos < linePos && boxPos < pointPos && boxPos < trianglePos)) {
+            pos = boxPos + std::string("<box>").size();
+            std::cout << "Parsing box element at position: " << pos << std::endl;
+            layout->addElement(parseElement("box", pos));
+        } else if (linePos < layoutEnd && (linePos < pointPos && linePos < trianglePos)) {
+            pos = linePos + std::string("<line>").size();
+            std::cout << "Parsing line element at position: " << pos << std::endl;
+            layout->addElement(parseElement("line", pos));
+        } else if (pointPos < layoutEnd && pointPos < trianglePos) {
+            pos = pointPos + std::string("<point>").size();
+            std::cout << "Parsing point element at position: " << pos << std::endl;
+            layout->addElement(parseElement("point", pos));
+        } else if (trianglePos < layoutEnd) {
+            pos = trianglePos + std::string("<triangle>").size();
+            std::cout << "Parsing triangle element at position: " << pos << std::endl;
+            layout->addElement(parseElement("triangle", pos));
+        } else {
+            break;
+        }
+    }
+
+    pos = layoutEnd + std::string("</layout>").size();
+    std::cout << "Finished parsing layout. New position after </layout>: " << pos << std::endl;
+
     return layout;
 }
+
+
+
 
 std::unique_ptr<Element> Parser::parseElement(const std::string& type, size_t& pos) {
     if (type == "box") {

@@ -11,8 +11,8 @@ SDL2_LIBS = -lSDL2
 INCLUDES = -I. -Igui -Iparse
 
 # Source files and object files
-SRCS = tests/test_gui_file.cpp gui/gui.cpp parse/parse.cpp
-OBJS = tests/test_gui_file.o gui/gui.o parse/parse.o
+SRCS = tests/test_gui_file.cpp gui/GUIFile.cpp parse/parse.cpp
+OBJS = tests/test_gui_file.o gui/GUIFile.o parse/parse.o
 
 # Executable name
 EXEC = test
@@ -25,13 +25,13 @@ $(EXEC): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $(EXEC) $(SDL2_LIBS)
 
 # Compile individual source files into object files
-tests/test_gui_file.o: tests/test_gui_file.cpp gui/gui.hpp parse/parse.hpp
+tests/test_gui_file.o: tests/test_gui_file.cpp gui/GUIFile.hpp parse/parse.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c tests/test_gui_file.cpp -o tests/test_gui_file.o
 
-gui/gui.o: gui/gui.cpp gui/gui.hpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c gui/gui.cpp -o gui/gui.o
+gui/GUIFile.o: gui/GUIFile.cpp gui/GUIFile.hpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c gui/GUIFile.cpp -o gui/GUIFile.o
 
-parse/parse.o: parse/parse.cpp parse/parse.hpp gui/gui.hpp
+parse/parse.o: parse/parse.cpp parse/parse.hpp gui/GUIFile.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c parse/parse.cpp -o parse/parse.o
 
 # Clean up the build
