@@ -125,3 +125,13 @@ void Layout::calculatePosition(const ivec2& parentStart, const ivec2& parentEnd)
         nestedLayout->calculatePosition(start, end);
     }
 }
+
+void Layout::render(Screen& screen) {
+    if (!active) return;
+    for (const auto& element : elements) {
+        element->draw(screen, start);
+    }
+    for (const auto& nestedLayout : nestedLayouts) {
+        nestedLayout->render(screen);
+    }
+}
