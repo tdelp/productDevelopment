@@ -77,7 +77,58 @@ This setup enables a responsive and interactive GUI system that can be easily ex
 ## link to visual diagram showing relational spacing
 [Link](diagram.jpg)
 
-## XML Structure
+# Relational Spacing in GUI Layout
+
+This document explains how relational spacing works for the XML file provided, focusing on how `sX`, `sY`, `eX`, and `eY` attributes determine the position and size of nested layouts.
+
+## XML Structure and Relational Spacing
+
+### Root Layout
+
+The root `<layout>` element contains two direct child elements (a triangle and a box) and one nested layout.
+
+1. **Triangle**:
+   - Defined by three points with absolute coordinates:
+     - `(600, 100)`, `(700, 250)`, and `(650, 400)`.
+   - Since this triangle is a direct child of the root layout, its coordinates are based on the entire screen area (absolute positioning).
+
+2. **Box**:
+   - Defined with absolute coordinates:
+     - Top-left corner: `(800, 150)`, bottom-right corner: `(1000, 350)`.
+   - Like the triangle, this box is positioned within the root layout’s dimensions, relative to the screen.
+
+3. **Nested Layout**:
+   - The nested layout has attributes `sX`, `sY`, `eX`, and `eY`, which define its position and size relative to the root layout.
+   - **Relational Coordinates**:
+     - `sX: 0.1`, `sY: 0.1`: The starting position of the nested layout is 10% of the root layout’s width and height from the top-left corner.
+     - `eX: 0.5`, `eY: 0.5`: The ending position of the nested layout extends to 50% of the root layout’s width and height.
+   - This nested layout will, therefore, occupy the area from `(10%, 10%)` to `(50%, 50%)` of the screen (or root layout), creating a contained region within the root layout.
+
+### Elements within the Nested Layout
+
+The nested layout contains a triangle, a line, and a point. These elements have absolute coordinates, but they are positioned within the bounds of the nested layout.
+
+1. **Triangle in Nested Layout**:
+   - Defined by three points:
+     - `(100, 150)`, `(500, 250)`, and `(350, 200)`.
+   - Since these coordinates are within the nested layout, they are based on the dimensions of the nested layout area (from `(10%, 10%)` to `(50%, 50%)` of the root layout).
+
+2. **Line in Nested Layout**:
+   - Defined with two endpoints:
+     - Start: `(150, 150)`, End: `(400, 400)`.
+   - These coordinates are also within the nested layout’s bounds.
+
+3. **Point in Nested Layout**:
+   - Defined by a single position:
+     - `(250, 250)`.
+   - This point is positioned within the nested layout’s coordinates and will render inside the area defined by the nested layout’s `sX`, `sY`, `eX`, and `eY`.
+
+## Summary
+
+The `sX`, `sY`, `eX`, and `eY` attributes in each `<layout>` tag allow nested layouts to be positioned relative to their parent layout. This approach enables flexible, relational positioning that automatically adjusts based on the dimensions of the parent layout, supporting responsive and adaptive GUI designs.
+
+
+## XML Input Described Above
 
 ```xml
 <layout>
