@@ -75,6 +75,7 @@ The application initializes SDL, creates a `Screen` object, and parses an XML fi
         <point>...</point>
     </layout>
 </layout>
+```xml
 
 # Application Demo Modifications
 
