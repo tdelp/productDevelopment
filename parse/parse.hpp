@@ -2,6 +2,7 @@
 #define __PARSE_HPP__
 
 #include "../gui/GUIFile.hpp"
+#include "../layout/layout.hpp"
 #include <fstream>
 #include <iostream>
 #include <memory>
