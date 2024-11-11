@@ -49,33 +49,6 @@ The application initializes SDL, creates a `Screen` object, and parses an XML fi
 **Mouse Interaction**:
 - Checks if the mouse is within a triangle’s bounds to toggle the nested layout’s `active` state.
 
-## XML Structure
-
-```xml
-<layout>
-    <triangle>
-        <vec2><x>600</x><y>100</y></vec2>
-        <vec2><x>700</x><y>250</y></vec2>
-        <vec2><x>650</x><y>400</y></vec2>
-        <vec3><x>255</x><y>100</x><z>50</z></vec3>
-    </triangle>
-    <box>
-        <vec2><x>800</x><y>150</y></vec2>
-        <vec2><x>1000</x><y>350</y></vec2>
-        <vec3><x>100</x><y>150</x><z>200</z></vec3>
-    </box>
-    <layout>
-        <sX>0.1</sX>
-        <sY>0.1</sY>
-        <eX>0.5</eX>
-        <eY>0.5</eY>
-        <active>false</active>
-        <triangle>...</triangle>
-        <line>...</line>
-        <point>...</point>
-    </layout>
-</layout>
-```xml
 
 # Application Demo Modifications
 
@@ -103,3 +76,30 @@ This setup enables a responsive and interactive GUI system that can be easily ex
 
 ## link to visual diagram showing relational spacing
 [Link](diagram.jpg)
+
+## XML Structure
+
+```xml
+<layout>
+    <triangle>
+        <vec2><x>600</x><y>100</y></vec2>
+        <vec2><x>700</x><y>250</y></vec2>
+        <vec2><x>650</x><y>400</y></vec2>
+        <vec3><x>255</x><y>100</x><z>50</z></vec3>
+    </triangle>
+    <box>
+        <vec2><x>800</x><y>150</y></vec2>
+        <vec2><x>1000</x><y>350</y></vec2>
+        <vec3><x>100</x><y>150</x><z>200</z></vec3>
+    </box>
+    <layout>
+        <sX>0.1</sX>
+        <sY>0.1</sY>
+        <eX>0.5</eX>
+        <eY>0.5</eY>
+        <active>false</active>
+        <triangle>...</triangle>
+        <line>...</line>
+        <point>...</point>
+    </layout>
+</layout>
