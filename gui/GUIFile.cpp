@@ -1,5 +1,4 @@
-#include "GUIFile.hpp"
-#include <cmath>
+#include "../all_headers.hpp"
 
 // Implementation of LineElement
 LineElement::LineElement(const std::array<float, 2>& start, const std::array<float, 2>& end, const std::array<float, 3>& color)

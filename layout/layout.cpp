@@ -1,5 +1,4 @@
-#include "layout.hpp"
-#include <iostream>
+#include "../all_headers.hpp"
 
 // Layout implementation
 void Layout::addElement(std::unique_ptr<Element> element) {

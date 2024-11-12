@@ -1,8 +1,4 @@
-#include "../parse/parse.hpp"          // Include for the Parser class
-#include "../screen/Screen.hpp"
-#include <SDL2/SDL.h>
-#include <cmath> // For std::round
-#include <iostream> // For debugging output
+#include "../all_headers.hpp"
 
 int main(int argc, char* argv[]) {
     // Initialize SDL

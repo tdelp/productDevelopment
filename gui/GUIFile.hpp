@@ -1,10 +1,7 @@
 #ifndef __GUI_HPP__
 #define __GUI_HPP__
 
-#include "../screen/Screen.hpp"
-#include <array>
-#include <memory>
-#include <vector>
+#include "../all_headers.hpp"
 
 // Abstract Base Class for all GUI Elements
 class Element {

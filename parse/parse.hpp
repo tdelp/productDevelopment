@@ -1,12 +1,7 @@
 #ifndef __PARSE_HPP__
 #define __PARSE_HPP__
 
-#include "../gui/GUIFile.hpp"
-#include "../layout/layout.hpp"
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <string>
+#include "../all_headers.hpp"
 
 class Parser {
 public:

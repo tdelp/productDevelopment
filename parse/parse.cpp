@@ -1,4 +1,4 @@
-#include "parse.hpp"
+#include "../all_headers.hpp"
 
 Parser::Parser(const std::string& fileName) {
     loadFile(fileName);

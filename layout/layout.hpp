@@ -1,11 +1,7 @@
 #ifndef __LAYOUT_HPP__
 #define __LAYOUT_HPP__
 
-#include "../screen/Screen.hpp"
-#include "../gui/GUIFile.hpp"
-#include <array>
-#include <vector>
-#include <memory>
+#include "../all_headers.hpp"
 
 class Layout {
 public:
