@@ -31,7 +31,7 @@ void Layout::render(Screen& screen) {
     if (!active) return;
 
     for (const auto& element : elements) {
-        element->draw(screen, start);
+        element->draw(screen, start, end);
     }
 
     for (const auto& nestedLayout : nestedLayouts) {
