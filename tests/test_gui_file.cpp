@@ -50,13 +50,11 @@ int main(int argc, char* argv[]) {
         // Check if mouse is inside the first element of the root layout (assuming first element is a triangle)
         if (!rootLayout->getElements().empty()) {
             bool mouseInsideFirstElement = rootLayout->getElements()[0]->isInside({x, y});
-            std::cout << "Mouse inside first element: " << (mouseInsideFirstElement ? "Yes" : "No") << std::endl;
 
             // Toggle the first nested layout based on mouse position
             if (!rootLayout->getNestedLayouts().empty()) {
                 auto& nestedLayout = rootLayout->getNestedLayouts()[0];
                 nestedLayout->setActive(mouseInsideFirstElement);
-                std::cout << "Nested layout activation status: " << (mouseInsideFirstElement ? "Activated" : "Deactivated") << std::endl;
             }
         }
 

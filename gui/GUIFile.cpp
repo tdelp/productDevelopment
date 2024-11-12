@@ -4,24 +4,33 @@
 LineElement::LineElement(const std::array<float, 2>& start, const std::array<float, 2>& end, const std::array<float, 3>& color)
     : start(start), end(end), color(color) {}
 
-void LineElement::draw(Screen& screen, const ivec2& offset) const {
-    screen.drawSafeLine(
-        ivec2(static_cast<int>(std::round(start[0])) + offset.x, static_cast<int>(std::round(start[1])) + offset.y),
-        ivec2(static_cast<int>(std::round(end[0])) + offset.x, static_cast<int>(std::round(end[1])) + offset.y),
-        ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
-    );
+void LineElement::draw(Screen& screen, const ivec2& offset, const ivec2& limit) const {
+    ivec2 startPoint(static_cast<int>(std::round(start[0])) + offset.x, static_cast<int>(std::round(start[1])) + offset.y);
+    ivec2 endPoint(static_cast<int>(std::round(end[0])) + offset.x, static_cast<int>(std::round(end[1])) + offset.y);
+
+    // Ensure line is within the bounds of offset and limit
+    if ((startPoint.x < offset.x || startPoint.y < offset.y || startPoint.x > limit.x || startPoint.y > limit.y) &&
+        (endPoint.x < offset.x || endPoint.y < offset.y || endPoint.x > limit.x || endPoint.y > limit.y)) {
+        return;
+    }
+
+    screen.drawSafeLine(startPoint, endPoint, ivec3(color[0], color[1], color[2]));
 }
 
 // Implementation of BoxElement
 BoxElement::BoxElement(const std::array<float, 2>& min, const std::array<float, 2>& max, const std::array<float, 3>& color)
     : min(min), max(max), color(color) {}
 
-void BoxElement::draw(Screen& screen, const ivec2& offset) const {
-    screen.drawSafeBox(
-        ivec2(static_cast<int>(std::round(min[0])) + offset.x, static_cast<int>(std::round(min[1])) + offset.y),
-        ivec2(static_cast<int>(std::round(max[0])) + offset.x, static_cast<int>(std::round(max[1])) + offset.y),
-        ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
-    );
+void BoxElement::draw(Screen& screen, const ivec2& offset, const ivec2& limit) const {
+    ivec2 minPoint(static_cast<int>(std::round(min[0])) + offset.x, static_cast<int>(std::round(min[1])) + offset.y);
+    ivec2 maxPoint(static_cast<int>(std::round(max[0])) + offset.x, static_cast<int>(std::round(max[1])) + offset.y);
+
+    minPoint.x = std::max(minPoint.x, offset.x);
+    minPoint.y = std::max(minPoint.y, offset.y);
+    maxPoint.x = std::min(maxPoint.x, limit.x);
+    maxPoint.y = std::min(maxPoint.y, limit.y);
+
+    screen.drawSafeBox(minPoint, maxPoint, ivec3(color[0], color[1], color[2]));
 }
 
 bool BoxElement::isInside(const ivec2& point) const {
@@ -32,11 +41,12 @@ bool BoxElement::isInside(const ivec2& point) const {
 PointElement::PointElement(const std::array<float, 2>& position, const std::array<float, 3>& color)
     : position(position), color(color) {}
 
-void PointElement::draw(Screen& screen, const ivec2& offset) const {
-    screen.setSafePixel(
-        ivec2(static_cast<int>(std::round(position[0])) + offset.x, static_cast<int>(std::round(position[1])) + offset.y),
-        ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
-    );
+void PointElement::draw(Screen& screen, const ivec2& offset, const ivec2& limit) const {
+    ivec2 point(static_cast<int>(std::round(position[0])) + offset.x, static_cast<int>(std::round(position[1])) + offset.y);
+
+    if (point.x >= offset.x && point.y >= offset.y && point.x <= limit.x && point.y <= limit.y) {
+        screen.setSafePixel(point, ivec3(color[0], color[1], color[2]));
+    }
 }
 
 bool PointElement::isInside(const ivec2& point) const {
@@ -47,17 +57,19 @@ bool PointElement::isInside(const ivec2& point) const {
 TriangleElement::TriangleElement(const std::array<float, 2>& v0, const std::array<float, 2>& v1, const std::array<float, 2>& v2, const std::array<float, 3>& color)
     : v0(v0), v1(v1), v2(v2), color(color) {}
 
-void TriangleElement::draw(Screen& screen, const ivec2& offset) const {
-    screen.drawSafeTriangle(
-        ivec2(static_cast<int>(std::round(v0[0])) + offset.x, static_cast<int>(std::round(v0[1])) + offset.y),
-        ivec2(static_cast<int>(std::round(v1[0])) + offset.x, static_cast<int>(std::round(v1[1])) + offset.y),
-        ivec2(static_cast<int>(std::round(v2[0])) + offset.x, static_cast<int>(std::round(v2[1])) + offset.y),
-        ivec3(static_cast<int>(std::round(color[0])), static_cast<int>(std::round(color[1])), static_cast<int>(std::round(color[2])))
-    );
+void TriangleElement::draw(Screen& screen, const ivec2& offset, const ivec2& limit) const {
+    ivec2 v0Point(static_cast<int>(std::round(v0[0])) + offset.x, static_cast<int>(std::round(v0[1])) + offset.y);
+    ivec2 v1Point(static_cast<int>(std::round(v1[0])) + offset.x, static_cast<int>(std::round(v1[1])) + offset.y);
+    ivec2 v2Point(static_cast<int>(std::round(v2[0])) + offset.x, static_cast<int>(std::round(v2[1])) + offset.y);
+
+    if ((v0Point.x >= offset.x && v0Point.y >= offset.y && v0Point.x <= limit.x && v0Point.y <= limit.y) ||
+        (v1Point.x >= offset.x && v1Point.y >= offset.y && v1Point.x <= limit.x && v1Point.y <= limit.y) ||
+        (v2Point.x >= offset.x && v2Point.y >= offset.y && v2Point.x <= limit.x && v2Point.y <= limit.y)) {
+        screen.drawSafeTriangle(v0Point, v1Point, v2Point, ivec3(color[0], color[1], color[2]));
+    }
 }
 
 bool TriangleElement::isInside(const ivec2& point) const {
-    // Using cross-product method to check if point is inside triangle
     auto sign = [](const ivec2& p1, const ivec2& p2, const ivec2& p3) {
         return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
     };
