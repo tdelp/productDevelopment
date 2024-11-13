@@ -21,19 +21,60 @@ int main(int argc, char* argv[]) {
     SDL_Surface* screenSurface = SDL_CreateRGBSurface(0, 1280, 720, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0);
     Screen screen(1280, 720, screenSurface);
 
-    // Initialize Parser and load the root layout from XML
-    Parser parser("input.xml");  // Assuming the XML file is named "input.xml"
-    auto rootLayout = parser.parseRootLayout();
-    
-    if (!rootLayout) {
-        std::cerr << "Error: Root layout could not be parsed." << std::endl;
+    // Load the first layout from the first XML file
+    Parser parser1("input1.xml");
+    auto rootLayout1 = parser1.parseRootLayout();
+    if (!rootLayout1) {
+        std::cerr << "Error: First root layout could not be parsed." << std::endl;
         SDL_DestroyWindow(window);
         SDL_Quit();
         return 1;
     }
+    rootLayout1->calculatePosition({0, 0}, {1280, 720});
 
-    // Calculate initial positions for root and nested layouts
-    rootLayout->calculatePosition({0, 0}, {1280, 720});
+    // Start time for the 5-second render loop
+    Uint32 startTime = SDL_GetTicks();
+
+    // Render loop for the first layout (runs for 5 seconds)
+    while (SDL_GetTicks() - startTime < 5000) {
+        // Clear screen buffer
+        SDL_FillRect(screen.surface, NULL, SDL_MapRGB(screen.surface->format, 0, 0, 0));
+        
+        // Render the first layout
+        rootLayout1->render(screen);
+        
+        // Blit the rendered screen surface to the window surface and update the window
+        screen.blitTo(windowSurface);
+        SDL_UpdateWindowSurface(window);
+
+        // Poll for quit event
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                SDL_DestroyWindow(window);
+                SDL_Quit();
+                return 0;
+            }
+        }
+
+        SDL_Delay(16); // Delay for 60 FPS
+    }
+
+    // Clear the screen after 5 seconds
+    SDL_FillRect(screen.surface, NULL, SDL_MapRGB(screen.surface->format, 0, 0, 0));
+    screen.blitTo(windowSurface);
+    SDL_UpdateWindowSurface(window);
+
+    // Load the second layout from the second XML file
+    Parser parser2("input.xml");
+    auto rootLayout2 = parser2.parseRootLayout();
+    if (!rootLayout2) {
+        std::cerr << "Error: Second root layout could not be parsed." << std::endl;
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+    rootLayout2->calculatePosition({0, 0}, {1280, 720});
     std::cout << "Root layout and nested layouts positions calculated." << std::endl;
 
     // Main SDL loop with mouse interaction to toggle nested layout activation
@@ -47,19 +88,19 @@ int main(int argc, char* argv[]) {
         int x, y;
         SDL_GetMouseState(&x, &y);
 
-        // Check if mouse is inside the first element of the root layout (assuming first element is a triangle)
-        if (!rootLayout->getElements().empty()) {
-            bool mouseInsideFirstElement = rootLayout->getElements()[0]->isInside({x, y});
+        // Check if mouse is inside the first element of the second root layout (assuming first element is a triangle)
+        if (!rootLayout2->getElements().empty()) {
+            bool mouseInsideFirstElement = rootLayout2->getElements()[0]->isInside({x, y});
 
             // Toggle the first nested layout based on mouse position
-            if (!rootLayout->getNestedLayouts().empty()) {
-                auto& nestedLayout = rootLayout->getNestedLayouts()[0];
+            if (!rootLayout2->getNestedLayouts().empty()) {
+                auto& nestedLayout = rootLayout2->getNestedLayouts()[0];
                 nestedLayout->setActive(mouseInsideFirstElement);
             }
         }
 
-        // Render the root layout and its nested layouts based on active state
-        rootLayout->render(screen);
+        // Render the second root layout and its nested layouts based on active state
+        rootLayout2->render(screen);
 
         // Blit the rendered screen surface to the window surface and update the window
         screen.blitTo(windowSurface);
