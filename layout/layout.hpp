@@ -18,6 +18,7 @@ public:
     void calculatePosition(const ivec2& parentStart, const ivec2& parentEnd);
     void render(Screen& screen);
     void handleEvent(const Event& event, SoundPlayer* soundPlayer);
+    void propagateEventUp(const Event& event, SoundPlayer* soundPlayer);
 
 private:
     float sX, sY, eX, eY;

@@ -2,7 +2,6 @@
 #include "../SoundPlayer.hpp"
 
 int main(int argc, char* argv[]) {
-    // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         std::cerr << "Error initializing SDL: " << SDL_GetError() << std::endl;
         return 1;
@@ -93,19 +92,13 @@ int main(int argc, char* argv[]) {
             if (event.type == SDL_QUIT) {
                 running = false;
             } else if (event.type == SDL_MOUSEBUTTONDOWN) {
-                // Handle CLICK event
                 Event clickEvent(EventType::CLICK, event.button.x, event.button.y);
                 rootLayout2->handleEvent(clickEvent, &soundPlayer);
-
-                // Trigger SOUND event
-                Event soundEvent(EventType::SOUND, "ding.wav");
-                rootLayout2->handleEvent(soundEvent, &soundPlayer);
             }
         }
         SDL_Delay(16); // Delay for 60 FPS
     }
 
-    // Clean up and quit SDL
     SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
