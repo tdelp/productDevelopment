@@ -3,14 +3,20 @@
 
 #include "all_headers.hpp"
 
-enum class EventType { CLICK };
+enum class EventType { CLICK, SOUND };
 
 struct Event {
     EventType type;
-    int x, y;  // Coordinates for CLICK events
+    int x = 0, y = 0;                // Coordinates for CLICK events
+    std::string soundFile;            // Filename for SOUND events
 
+    // Constructor for CLICK events
     Event(EventType eventType, int xPos = 0, int yPos = 0)
         : type(eventType), x(xPos), y(yPos) {}
+
+    // Constructor for SOUND events
+    Event(EventType eventType, const std::string& file)
+        : type(eventType), soundFile(file) {}
 };
 
 // ButtonElement class representing a clickable button

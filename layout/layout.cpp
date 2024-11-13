@@ -5,6 +5,7 @@ void Layout::addElement(std::unique_ptr<Element> element) {
 }
 
 void Layout::addNestedLayout(std::unique_ptr<Layout> layout) {
+    layout->parentLayout = this;  // Set parent for nested layouts
     nestedLayouts.push_back(std::move(layout));
 }
 
@@ -30,26 +31,28 @@ void Layout::render(Screen& screen) {
     }
 }
 
-void Layout::handleEvent(const Event& event) {
+void Layout::handleEvent(const Event& event, SoundPlayer* soundPlayer) {
     if (event.type == EventType::CLICK) {
-        bool eventHandled = false;
-
         for (auto& element : elements) {
             ButtonElement* button = dynamic_cast<ButtonElement*>(element.get());
             if (button && button->handleEvent(event)) {
-                eventHandled = true;
-
+                // Toggle the visibility of the first nested layout
                 if (!nestedLayouts.empty()) {
                     nestedLayouts[0]->setActive(!nestedLayouts[0]->isActive());
                 }
-                break;
+
+                // Play sound only if the button handled the click
+                if (soundPlayer) {
+                    soundPlayer->playSound();
+                }
+                
+                return; // Stop further processing after handling click on button
             }
         }
 
-        if (!eventHandled) {
-            for (auto& nestedLayout : nestedLayouts) {
-                nestedLayout->handleEvent(event);
-            }
+        // Propagate CLICK event to nested layouts if not handled by any element
+        for (auto& nestedLayout : nestedLayouts) {
+            nestedLayout->handleEvent(event, soundPlayer);
         }
     }
 }
