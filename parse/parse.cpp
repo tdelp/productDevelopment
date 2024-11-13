@@ -24,7 +24,7 @@ std::unique_ptr<Layout> Parser::parseRootLayout() {
     pos += std::string("<layout>").size();
 
     // Create the root layout with full-screen dimensions (sX=0, sY=0, eX=1, eY=1)
-    auto rootLayout = std::make_unique<Layout>(0, 0, 1, 1, "",true);
+    auto rootLayout = std::make_unique<Layout>(0, 0, 1, 1, true);
 
     // Parse child elements within the root layout
     size_t layoutEnd = data.find("</layout>", pos);
@@ -69,7 +69,7 @@ std::unique_ptr<Layout> Parser::parseRootLayout() {
 std::unique_ptr<Layout> Parser::parseLayout(size_t& pos) {
     // Parse offsets only for nested layouts
     float sX = 0, sY = 0, eX = 1, eY = 1;
-    bool active = true;
+    bool active = false;
 
     std::cout << "Starting parseLayout at position: " << pos << std::endl;
     std::cout << "Default layout attributes - sX: " << sX << ", sY: " << sY << ", eX: " << eX << ", eY: " << eY << ", active: " << active << std::endl;
@@ -113,7 +113,7 @@ std::unique_ptr<Layout> Parser::parseLayout(size_t& pos) {
 
     std::cout << "Parsed active attribute: " << active << std::endl;
 
-    auto layout = std::make_unique<Layout>(sX, sY, eX, eY, "", active);
+    auto layout = std::make_unique<Layout>(sX, sY, eX, eY, active);
 
     std::cout << "End of current layout tag found at position: " << layoutEnd << std::endl;
 

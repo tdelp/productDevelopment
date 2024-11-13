@@ -32,44 +32,22 @@ int main(int argc, char* argv[]) {
     }
     rootLayout1->calculatePosition({0, 0}, {1280, 720});
 
-    // Create a ButtonElement and add it to rootLayout1
-    ivec2 buttonPosition(200, 100);       // Position of the button on the screen
-    ivec2 buttonSize(150, 50);            // Width and height of the button
-    ivec3 buttonColor(255, 0, 0);         // Color of the button (red)
-    std::string targetLayoutName = "SomeLayout"; // The layout to show/hide when the button is clicked
-
-    auto button = std::make_unique<ButtonElement>(buttonPosition, buttonSize, buttonColor, targetLayoutName);
-    rootLayout1->addElement(std::move(button));  // Add button to rootLayout1
-
-    // Start time for the 5-second render loop
+    // Render the first layout for 5 seconds
     Uint32 startTime = SDL_GetTicks();
-
-    // Render loop for the first layout (runs for 5 seconds)
     while (SDL_GetTicks() - startTime < 5000) {
-        // Clear screen buffer
         SDL_FillRect(screen.surface, NULL, SDL_MapRGB(screen.surface->format, 0, 0, 0));
-        
-        // Render the first layout
         rootLayout1->render(screen);
-        
-        // Blit the rendered screen surface to the window surface and update the window
         screen.blitTo(windowSurface);
         SDL_UpdateWindowSurface(window);
 
-        // Poll for quit event and handle click events
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 SDL_DestroyWindow(window);
                 SDL_Quit();
                 return 0;
-            } else if (event.type == SDL_MOUSEBUTTONDOWN) {
-                // Create a click event and send it to rootLayout1
-                Event clickEvent(EventType::CLICK, event.button.x, event.button.y);
-                rootLayout1->handleEvent(clickEvent);
             }
         }
-
         SDL_Delay(16); // Delay for 60 FPS
     }
 
@@ -88,29 +66,21 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     rootLayout2->calculatePosition({0, 0}, {1280, 720});
-    std::cout << "Root layout and nested layouts positions calculated." << std::endl;
+
+    // Create a ButtonElement and add it to rootLayout2
+    ivec2 buttonPosition(50, 25);       // Position of the button on the screen
+    ivec2 buttonSize(150, 50);            // Width and height of the button
+    ivec3 buttonColor(255, 0, 0);         // Color of the button (red)
+    std::string targetLayoutName = "NestedLayout"; // The layout to show/hide when the button is clicked
+
+    auto button = std::make_unique<ButtonElement>(buttonPosition, buttonSize, buttonColor, targetLayoutName);
+    rootLayout2->addElement(std::move(button));  // Add button to rootLayout2
 
     // Main SDL loop with mouse interaction to toggle nested layout activation
     bool running = true;
-    SDL_Event event;
     while (running) {
         // Clear screen buffer
         SDL_FillRect(screen.surface, NULL, SDL_MapRGB(screen.surface->format, 0, 0, 0));
-
-        // Get mouse position
-        int x, y;
-        SDL_GetMouseState(&x, &y);
-
-        // Check if mouse is inside the first element of the second root layout (assuming first element is a triangle)
-        if (!rootLayout2->getElements().empty()) {
-            bool mouseInsideFirstElement = rootLayout2->getElements()[0]->isInside({x, y});
-
-            // Toggle the first nested layout based on mouse position
-            if (!rootLayout2->getNestedLayouts().empty()) {
-                auto& nestedLayout = rootLayout2->getNestedLayouts()[0];
-                nestedLayout->setActive(mouseInsideFirstElement);
-            }
-        }
 
         // Render the second root layout and its nested layouts based on active state
         rootLayout2->render(screen);
@@ -119,11 +89,28 @@ int main(int argc, char* argv[]) {
         screen.blitTo(windowSurface);
         SDL_UpdateWindowSurface(window);
 
-        // Poll for quit event
+        // Poll for quit event and handle click events
+        SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) running = false;
-        }
+            if (event.type == SDL_QUIT) {
+                running = false;
+            } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                // Create a click event and send it to rootLayout2
+                Event clickEvent(EventType::CLICK, event.button.x, event.button.y);
+                rootLayout2->handleEvent(clickEvent);
 
+                // Toggle the visibility of the first nested layout in rootLayout2 based on button click
+                for (auto& element : rootLayout2->getElements()) {
+                    ButtonElement* button = dynamic_cast<ButtonElement*>(element.get());
+                    if (button && button->isClicked()) {
+                        if (!rootLayout2->getNestedLayouts().empty()) {
+                            auto& nestedLayout = rootLayout2->getNestedLayouts()[0];
+                            nestedLayout->setActive(!nestedLayout->isActive());
+                        }
+                    }
+                }
+            }
+        }
         SDL_Delay(16); // Delay for 60 FPS
     }
 

@@ -9,8 +9,6 @@ void Layout::addNestedLayout(std::unique_ptr<Layout> layout) {
     nestedLayouts.push_back(std::move(layout));
 }
 
-void Layout::setActive(bool state) { active = state; }
-
 void Layout::calculatePosition(const ivec2& parentStart, const ivec2& parentEnd) {
     ivec2 space = parentEnd - parentStart;
     start = ivec2(static_cast<int>(sX * space.x), static_cast<int>(sY * space.y)) + parentStart;
@@ -40,11 +38,6 @@ void Layout::render(Screen& screen) {
 
 // New method to handle and propagate events
 void Layout::handleEvent(const Event& event) {
-    // Toggle visibility on SHOW event
-    if (event.type == EventType::SHOW && event.target == name) {
-        active = !active;
-    }
-
     // Propagate CLICK events to all elements
     for (auto& element : elements) {
         // Only call handleEvent if the element is a ButtonElement
