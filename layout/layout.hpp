@@ -1,4 +1,3 @@
-// Layout.hpp
 #ifndef LAYOUT_HPP
 #define LAYOUT_HPP
 
@@ -13,17 +12,15 @@ public:
     void addElement(std::unique_ptr<Element> element);
     void addNestedLayout(std::unique_ptr<Layout> layout);
     void setActive(bool state) { active = state; }
-    
+
     bool isActive() const { return active; }
 
     void calculatePosition(const ivec2& parentStart, const ivec2& parentEnd);
     void render(Screen& screen);
-    void handleEvent(const Event& event); // Handle events directly without needing names
+    void handleEvent(const Event& event);
 
     const ivec2& getStart() const { return start; }
     const ivec2& getEnd() const { return end; }
-    const std::vector<std::unique_ptr<Element>>& getElements() const { return elements; }
-    const std::vector<std::unique_ptr<Layout>>& getNestedLayouts() const { return nestedLayouts; }
 
 private:
     float sX, sY, eX, eY;

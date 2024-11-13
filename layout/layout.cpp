@@ -1,6 +1,5 @@
 #include "../all_headers.hpp"
 
-// Layout implementation
 void Layout::addElement(std::unique_ptr<Element> element) {
     elements.push_back(std::move(element));
 }
@@ -14,11 +13,6 @@ void Layout::calculatePosition(const ivec2& parentStart, const ivec2& parentEnd)
     start = ivec2(static_cast<int>(sX * space.x), static_cast<int>(sY * space.y)) + parentStart;
     end = ivec2(static_cast<int>(eX * space.x), static_cast<int>(eY * space.y)) + parentStart;
 
-    // Debug output
-    std::cout << "Layout position calculated: " << std::endl;
-    std::cout << "Start: (" << start.x << ", " << start.y << ") End: (" << end.x << ", " << end.y << ")" << std::endl;
-
-    // Recursively calculate positions for nested layouts
     for (auto& nestedLayout : nestedLayouts) {
         nestedLayout->calculatePosition(start, end);
     }
@@ -36,21 +30,26 @@ void Layout::render(Screen& screen) {
     }
 }
 
-// New method to handle and propagate events
 void Layout::handleEvent(const Event& event) {
-    // Propagate CLICK events to all elements
-    for (auto& element : elements) {
-        // Only call handleEvent if the element is a ButtonElement
-        ButtonElement* button = dynamic_cast<ButtonElement*>(element.get());
-        if (button && button->handleEvent(event) && event.type == EventType::CLICK) {
-            // Trigger SHOW event based on ButtonElement's target layout
-            Event showEvent(EventType::SHOW, 0, 0, event.target);
-            handleEvent(showEvent);
-        }
-    }
+    if (event.type == EventType::CLICK) {
+        bool eventHandled = false;
 
-    // Propagate event to nested layouts
-    for (auto& nestedLayout : nestedLayouts) {
-        nestedLayout->handleEvent(event);
+        for (auto& element : elements) {
+            ButtonElement* button = dynamic_cast<ButtonElement*>(element.get());
+            if (button && button->handleEvent(event)) {
+                eventHandled = true;
+
+                if (!nestedLayouts.empty()) {
+                    nestedLayouts[0]->setActive(!nestedLayouts[0]->isActive());
+                }
+                break;
+            }
+        }
+
+        if (!eventHandled) {
+            for (auto& nestedLayout : nestedLayouts) {
+                nestedLayout->handleEvent(event);
+            }
+        }
     }
 }
