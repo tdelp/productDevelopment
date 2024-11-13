@@ -32,6 +32,15 @@ int main(int argc, char* argv[]) {
     }
     rootLayout1->calculatePosition({0, 0}, {1280, 720});
 
+    // Create a ButtonElement and add it to rootLayout1
+    ivec2 buttonPosition(200, 100);       // Position of the button on the screen
+    ivec2 buttonSize(150, 50);            // Width and height of the button
+    ivec3 buttonColor(255, 0, 0);         // Color of the button (red)
+    std::string targetLayoutName = "SomeLayout"; // The layout to show/hide when the button is clicked
+
+    auto button = std::make_unique<ButtonElement>(buttonPosition, buttonSize, buttonColor, targetLayoutName);
+    rootLayout1->addElement(std::move(button));  // Add button to rootLayout1
+
     // Start time for the 5-second render loop
     Uint32 startTime = SDL_GetTicks();
 
@@ -47,13 +56,17 @@ int main(int argc, char* argv[]) {
         screen.blitTo(windowSurface);
         SDL_UpdateWindowSurface(window);
 
-        // Poll for quit event
+        // Poll for quit event and handle click events
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 SDL_DestroyWindow(window);
                 SDL_Quit();
                 return 0;
+            } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                // Create a click event and send it to rootLayout1
+                Event clickEvent(EventType::CLICK, event.button.x, event.button.y);
+                rootLayout1->handleEvent(clickEvent);
             }
         }
 

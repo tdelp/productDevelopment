@@ -26,7 +26,6 @@ void Layout::calculatePosition(const ivec2& parentStart, const ivec2& parentEnd)
     }
 }
 
-
 void Layout::render(Screen& screen) {
     if (!active) return;
 
@@ -36,5 +35,29 @@ void Layout::render(Screen& screen) {
 
     for (const auto& nestedLayout : nestedLayouts) {
         nestedLayout->render(screen);
+    }
+}
+
+// New method to handle and propagate events
+void Layout::handleEvent(const Event& event) {
+    // Toggle visibility on SHOW event
+    if (event.type == EventType::SHOW && event.target == name) {
+        active = !active;
+    }
+
+    // Propagate CLICK events to all elements
+    for (auto& element : elements) {
+        // Only call handleEvent if the element is a ButtonElement
+        ButtonElement* button = dynamic_cast<ButtonElement*>(element.get());
+        if (button && button->handleEvent(event) && event.type == EventType::CLICK) {
+            // Trigger SHOW event based on ButtonElement's target layout
+            Event showEvent(EventType::SHOW, 0, 0, event.target);
+            handleEvent(showEvent);
+        }
+    }
+
+    // Propagate event to nested layouts
+    for (auto& nestedLayout : nestedLayouts) {
+        nestedLayout->handleEvent(event);
     }
 }
