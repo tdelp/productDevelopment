@@ -2,6 +2,7 @@
 #include "../SoundPlayer.hpp"
 
 int main(int argc, char* argv[]) {
+    // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         std::cerr << "Error initializing SDL: " << SDL_GetError() << std::endl;
         return 1;
@@ -36,6 +37,13 @@ int main(int argc, char* argv[]) {
     }
     rootLayout1->calculatePosition({0, 0}, {1280, 720});
 
+    // Create the SHOW ButtonElement in the bottom middle of the screen, hoverable but not clickable
+    ivec2 showButtonPosition(565, 650);  // Position for bottom middle
+    ivec2 buttonSize(150, 50);
+    ivec3 buttonColor(0, 255, 0);
+    auto hoverableButton = std::make_unique<ButtonElement>(showButtonPosition, buttonSize, buttonColor, true, false);
+    rootLayout1->addElement(std::move(hoverableButton));
+
     // Display the first layout for 5 seconds
     Uint32 startTime = SDL_GetTicks();
     while (SDL_GetTicks() - startTime < 5000) {
@@ -50,6 +58,10 @@ int main(int argc, char* argv[]) {
                 SDL_DestroyWindow(window);
                 SDL_Quit();
                 return 0;
+            } else if (event.type == SDL_MOUSEMOTION) {
+                // Handle SHOW event for hovering
+                Event showEvent(EventType::SHOW, event.motion.x, event.motion.y);
+                rootLayout1->handleEvent(showEvent, &soundPlayer);
             }
         }
         SDL_Delay(16); // Delay for 60 FPS
@@ -71,13 +83,10 @@ int main(int argc, char* argv[]) {
     }
     rootLayout2->calculatePosition({0, 0}, {1280, 720});
 
-    // Create a ButtonElement and add it to the second layout
+    // Create the CLICK ButtonElement in the second layout (clickable with sound but not hoverable)
     ivec2 buttonPosition(50, 25);
-    ivec2 buttonSize(150, 50);
-    ivec3 buttonColor(255, 0, 0);
-
-    auto button = std::make_unique<ButtonElement>(buttonPosition, buttonSize, buttonColor);
-    rootLayout2->addElement(std::move(button));
+    auto clickableButton = std::make_unique<ButtonElement>(buttonPosition, buttonSize, buttonColor, false, true);
+    rootLayout2->addElement(std::move(clickableButton));
 
     // Main loop to interact with the second layout
     bool running = true;
@@ -92,13 +101,19 @@ int main(int argc, char* argv[]) {
             if (event.type == SDL_QUIT) {
                 running = false;
             } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                // Handle CLICK event
                 Event clickEvent(EventType::CLICK, event.button.x, event.button.y);
                 rootLayout2->handleEvent(clickEvent, &soundPlayer);
+            } else if (event.type == SDL_MOUSEMOTION) {
+                // Handle SHOW event for hovering
+                Event showEvent(EventType::SHOW, event.motion.x, event.motion.y);
+                rootLayout2->handleEvent(showEvent, &soundPlayer);
             }
         }
         SDL_Delay(16); // Delay for 60 FPS
     }
 
+    // Clean up and quit SDL
     SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
