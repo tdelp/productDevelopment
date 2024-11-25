@@ -1,38 +1,98 @@
 <layout>
-    <triangle>
-        <vec2><x>600</x><y>100</y></vec2>
-        <vec2><x>700</x><y>250</y></vec2>
-        <vec2><x>650</x><y>400</y></vec2>
-        <vec3><x>255</x><y>100</x><z>50</z></vec3>
-    </triangle>
     <box>
-        <vec2><x>800</x><y>150</y></vec2>
-        <vec2><x>1000</x><y>350</y></vec2>
-        <vec3><x>100</x><y>150</x><z>200</z></vec3>
+        <vec2><x>200</x><y>100</y></vec2>
+        <vec2><x>1080</x><y>620</y></vec2>
+        <vec3><x>150</x><y>150</y><z>150</z></vec3>
     </box>
+    
+    <line>
+        <vec2><x>200</x><y>273</y></vec2>
+        <vec2><x>1080</x><y>273</y></vec2>
+        <vec3><x>100</x><y>100</y><z>100</z></vec3>
+    </line>
+    
+    <line>
+        <vec2><x>200</x><y>446</y></vec2>
+        <vec2><x>1080</x><y>446</y></vec2>
+        <vec3><x>100</x><y>100</y><z>100</z></vec3>
+    </line>
+    
+    <line>
+        <vec2><x>493</x><y>100</y></vec2>
+        <vec2><x>493</x><y>620</y></vec2>
+        <vec3><x>100</x><y>100</y><z>100</z></vec3>
+    </line>
+    
+    <line>
+        <vec2><x>786</x><y>100</y></vec2>
+        <vec2><x>786</x><y>620</y></vec2>
+        <vec3><x>100</x><y>100</y><z>100</z></vec3>
+    </line>
+
     <layout>
-        <sX>0.1</sX>
-        <sY>0.1</sY>
-        <eX>0.5</eX>
-        <eY>0.5</eY>
+        <sX>0</sX>
+        <sY>0</sY>
+        <eX>1</eX>
+        <eY>1</eY>
         <active>false</active>
         
         <triangle>
-            <vec2><x>100</x><y>150</y></vec2>
-            <vec2><x>500</x><y>250</y></vec2>
-            <vec2><x>350</x><y>200</y></vec2>
-            <vec3><x>255</x><y>100</x><z>50</z></vec3>
+            <vec2><x>225</x><y>125</y></vec2>
+            <vec2><x>468</x><y>125</y></vec2>
+            <vec2><x>346</x><y>263</y></vec2>
+            <vec3><x>255</x><y>0</y><z>0</z></vec3>
         </triangle>
         
-        <line>
-            <vec2><x>150</x><y>150</y></vec2>
-            <vec2><x>400</x><y>400</y></vec2>
-            <vec3><x>200</x><y>50</x><z>150</z></vec3>
-        </line>
+        <box>
+            <vec2><x>518</x><y>125</y></vec2>
+            <vec2><x>761</x><y>253</y></vec2>
+            <vec3><x>0</x><y>255</y><z>0</z></vec3>
+        </box>
         
-        <point>
-            <vec2><x>250</x><y>250</y></vec2>
-            <vec3><x>0</x><y>255</x><z>0</z></vec3>
-        </point>
+        <triangle>
+            <vec2><x>811</x><y>125</y></vec2>
+            <vec2><x>1054</x><y>125</y></vec2>
+            <vec2><x>933</x><y>263</y></vec2>
+            <vec3><x>0</x><y>0</y><z>255</z></vec3>
+        </triangle>
+        
+        <box>
+            <vec2><x>225</x><y>296</y></vec2>
+            <vec2><x>468</x><y>424</y></vec2>
+            <vec3><x>255</x><y>255</y><z>0</z></vec3>
+        </box>
+        
+        <triangle>
+            <vec2><x>518</x><y>296</y></vec2>
+            <vec2><x>761</x><y>296</y></vec2>
+            <vec2><x>640</x><y>444</y></vec2>
+            <vec3><x>0</x><y>255</y><z>255</z></vec3>
+        </triangle>
+        
+        <box>
+            <vec2><x>811</x><y>296</y></vec2>
+            <vec2><x>1054</x><y>424</y></vec2>
+            <vec3><x>255</x><y>0</y><z>255</z></vec3>
+        </box>
+        
+        <triangle>
+            <vec2><x>225</x><y>473</y></vec2>
+            <vec2><x>468</x><y>473</y></vec2>
+            <vec2><x>346</x><y>613</y></vec2>
+            <vec3><x>128</x><y>0</y><z>128</z></vec3>
+        </triangle>
+        
+        <box>
+            <vec2><x>518</x><y>473</y></vec2>
+            <vec2><x>761</x><y>593</y></vec2>
+            <vec3><x>128</x><y>128</y><z>0</z></vec3>
+        </box>
+        
+        <triangle>
+            <vec2><x>811</x><y>473</y></vec2>
+            <vec2><x>1054</x><y>473</y></vec2>
+            <vec2><x>933</x><y>613</y></vec2>
+            <vec3><x>0</x><y>128</y><z>128</z></vec3>
+        </triangle>
     </layout>
 </layout>

@@ -1,8 +1,23 @@
-#ifndef ALl_HEADERS_H
-#define ALl_HEADERS_H
+#ifndef ALL_HEADERS_HPP
+#define ALL_HEADERS_HPP
 
-#include "Tvec2.hpp"
-#include "Tvec3.hpp"
-#include "matrix.hpp"
+#include <SDL2/SDL.h>
 
-#endif //ALl_HEADERS_HPP
+#include <cmath>
+#include <array>
+#include <memory>
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <string>
+
+#include "vecs/Tvec2.hpp"
+#include "vecs/Tvec3.hpp"
+#include "vecs/matrix.hpp"
+
+#include "screen/Screen.hpp"
+#include "gui/GUIFile.hpp"
+#include "layout/layout.hpp"
+#include "parse/parse.hpp"
+
+#endif // ALL_HEADERS_HPP

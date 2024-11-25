@@ -1,10 +1,7 @@
 #ifndef __SCREEN_HPP__
 #define __SCREEN_HPP__
 
-#include "../vecs/Tvec2.hpp"
-#include "../vecs/Tvec3.hpp"
-#include <SDL2/SDL.h>
-#include <iostream> // Include for debugging output
+#include "../all_headers.hpp"
 
 class Screen {
 public:

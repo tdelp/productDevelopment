@@ -1,19 +1,14 @@
-#include "../parse/parse.hpp"          // Include for the Parser class
-#include "../screen/Screen.hpp"
-#include <SDL2/SDL.h>
-#include <cmath> // For std::round
-#include <iostream> // For debugging output
+#include "../all_headers.hpp"
+#include "../SoundPlayer.hpp"
 
 int main(int argc, char* argv[]) {
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         std::cerr << "Error initializing SDL: " << SDL_GetError() << std::endl;
         return 1;
     }
 
-    // Create an SDL window and Screen object
-    SDL_Window* window = SDL_CreateWindow("Dynamic GUI Layout",
-                                          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    SDL_Window* window = SDL_CreateWindow("Dynamic GUI Layout", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                           1280, 720, SDL_WINDOW_SHOWN);
     if (!window) {
         std::cerr << "Error creating SDL window: " << SDL_GetError() << std::endl;
@@ -25,63 +20,101 @@ int main(int argc, char* argv[]) {
     SDL_Surface* screenSurface = SDL_CreateRGBSurface(0, 1280, 720, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0);
     Screen screen(1280, 720, screenSurface);
 
-    // Initialize Parser and load the root layout from XML
-    Parser parser("input.xml");  // Assuming the XML file is named "input.xml"
-    auto rootLayout = parser.parseRootLayout();
-    
-    if (!rootLayout) {
-        std::cerr << "Error: Root layout could not be parsed." << std::endl;
+    // Initialize SoundPlayer and load a sound file
+    SoundPlayer soundPlayer;
+    if (!soundPlayer.loadSound("ding.wav")) {
+        std::cerr << "Failed to load sound file" << std::endl;
+    }
+
+    // Load and display the first layout (input1.xml)
+    Parser parser1("input1.xml");
+    auto rootLayout1 = parser1.parseRootLayout();
+    if (!rootLayout1) {
+        std::cerr << "Error: First root layout could not be parsed." << std::endl;
         SDL_DestroyWindow(window);
         SDL_Quit();
         return 1;
     }
+    rootLayout1->calculatePosition({0, 0}, {1280, 720});
 
-    // Calculate initial positions for root and nested layouts
-    rootLayout->calculatePosition({0, 0}, {1280, 720});
-    std::cout << "Root layout and nested layouts positions calculated." << std::endl;
+    // Create the SHOW ButtonElement in the bottom middle of the screen, hoverable but not clickable
+    ivec2 showButtonPosition(565, 650);  // Position for bottom middle
+    ivec2 buttonSize(150, 50);
+    ivec3 buttonColor(0, 255, 0);
+    auto hoverableButton = std::make_unique<ButtonElement>(showButtonPosition, buttonSize, buttonColor, true, false);
+    rootLayout1->addElement(std::move(hoverableButton));
 
-    // Main SDL loop with mouse interaction to toggle nested layout activation
-    bool running = true;
-    SDL_Event event;
-    while (running) {
-        // Clear screen buffer
+    // Display the first layout for 5 seconds
+    Uint32 startTime = SDL_GetTicks();
+    while (SDL_GetTicks() - startTime < 5000) {
         SDL_FillRect(screen.surface, NULL, SDL_MapRGB(screen.surface->format, 0, 0, 0));
-
-        // Get mouse position
-        int x, y;
-        SDL_GetMouseState(&x, &y);
-
-        // Check if mouse is inside the first element of the root layout (assuming first element is a triangle)
-        if (!rootLayout->getElements().empty()) {
-            bool mouseInsideFirstElement = rootLayout->getElements()[0]->isInside({x, y});
-            std::cout << "Mouse inside first element: " << (mouseInsideFirstElement ? "Yes" : "No") << std::endl;
-
-            // Toggle the first nested layout based on mouse position
-            if (!rootLayout->getNestedLayouts().empty()) {
-                auto& nestedLayout = rootLayout->getNestedLayouts()[0];
-                nestedLayout->setActive(mouseInsideFirstElement);
-                std::cout << "Nested layout activation status: " << (mouseInsideFirstElement ? "Activated" : "Deactivated") << std::endl;
-            }
-        }
-
-        // Render the root layout and its nested layouts based on active state
-        rootLayout->render(screen);
-
-        // Blit the rendered screen surface to the window surface and update the window
+        rootLayout1->render(screen);
         screen.blitTo(windowSurface);
         SDL_UpdateWindowSurface(window);
 
-        // Poll for quit event
+        SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) running = false;
+            if (event.type == SDL_QUIT) {
+                SDL_DestroyWindow(window);
+                SDL_Quit();
+                return 0;
+            } else if (event.type == SDL_MOUSEMOTION) {
+                // Handle SHOW event for hovering
+                Event showEvent(EventType::SHOW, event.motion.x, event.motion.y);
+                rootLayout1->handleEvent(showEvent, &soundPlayer);
+            }
         }
-
         SDL_Delay(16); // Delay for 60 FPS
     }
 
-    // Cleanup SDL window and quit
+    // Clear the screen after displaying the first layout
+    SDL_FillRect(screen.surface, NULL, SDL_MapRGB(screen.surface->format, 0, 0, 0));
+    screen.blitTo(windowSurface);
+    SDL_UpdateWindowSurface(window);
+
+    // Load and interact with the second layout (input.xml)
+    Parser parser2("input.xml");
+    auto rootLayout2 = parser2.parseRootLayout();
+    if (!rootLayout2) {
+        std::cerr << "Error: Second root layout could not be parsed." << std::endl;
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+    rootLayout2->calculatePosition({0, 0}, {1280, 720});
+
+    // Create the CLICK ButtonElement in the second layout (clickable with sound but not hoverable)
+    ivec2 buttonPosition(50, 25);
+    auto clickableButton = std::make_unique<ButtonElement>(buttonPosition, buttonSize, buttonColor, false, true);
+    rootLayout2->addElement(std::move(clickableButton));
+
+    // Main loop to interact with the second layout
+    bool running = true;
+    while (running) {
+        SDL_FillRect(screen.surface, NULL, SDL_MapRGB(screen.surface->format, 0, 0, 0));
+        rootLayout2->render(screen);
+        screen.blitTo(windowSurface);
+        SDL_UpdateWindowSurface(window);
+
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                running = false;
+            } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                // Handle CLICK event
+                Event clickEvent(EventType::CLICK, event.button.x, event.button.y);
+                rootLayout2->handleEvent(clickEvent, &soundPlayer);
+            } else if (event.type == SDL_MOUSEMOTION) {
+                // Handle SHOW event for hovering
+                Event showEvent(EventType::SHOW, event.motion.x, event.motion.y);
+                rootLayout2->handleEvent(showEvent, &soundPlayer);
+            }
+        }
+        SDL_Delay(16); // Delay for 60 FPS
+    }
+
+    // Clean up and quit SDL
     SDL_DestroyWindow(window);
     SDL_Quit();
-
     return 0;
 }
