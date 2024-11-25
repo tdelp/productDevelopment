@@ -1,7 +1,8 @@
 #ifndef __SCREEN_HPP__
 #define __SCREEN_HPP__
 
-#include "all_headers.hpp"
+#include "../vecs/Tvec2.hpp"
+#include "../vecs/Tvec3.hpp"
 #include <SDL2/SDL.h>
 #include <iostream> // Include for debugging output
 
@@ -51,11 +52,6 @@ public:
             return; // Don't draw if both points are out of bounds
         }
 
-        // Debug message to show the input coordinates and color
-        std::cout << "Drawing line from (" << start.x << ", " << start.y << ") to (" 
-                  << end.x << ", " << end.y << ") with color (" 
-                  << color.x << ", " << color.y << ", " << color.z << ")\n";
-
         int dx = abs(end.x - start.x), dy = abs(end.y - start.y);
         int sx = (start.x < end.x) ? 1 : -1;
         int sy = (start.y < end.y) ? 1 : -1;
@@ -79,11 +75,6 @@ public:
             return;
         }
 
-        // Debug message to show the input coordinates and color
-        std::cout << "Drawing box from min (" << min.x << ", " << min.y << ") to max ("
-                  << max.x << ", " << max.y << ") with color ("
-                  << color.x << ", " << color.y << ", " << color.z << ")\n";
-
         drawBox(min, max, color);
     }
 
@@ -103,6 +94,40 @@ public:
                 setSafePixel(ivec2(x, y), color);  // Color each pixel in the box using the safe pixel function
             }
         }
+    }
+
+    // Function to draw a filled triangle using safe boundary checks
+    void drawSafeTriangle(ivec2 v0, ivec2 v1, ivec2 v2, ivec3 color) {
+        // Compute the bounding box of the triangle
+        int minX = std::min({v0.x, v1.x, v2.x});
+        int maxX = std::max({v0.x, v1.x, v2.x});
+        int minY = std::min({v0.y, v1.y, v2.y});
+        int maxY = std::max({v0.y, v1.y, v2.y});
+
+        // Loop through all pixels within the bounding box
+        for (int y = minY; y <= maxY; ++y) {
+            for (int x = minX; x <= maxX; ++x) {
+                // Use barycentric coordinates or cross-product method to check if the pixel is inside the triangle
+                if (isInsideTriangle(ivec2(x, y), v0, v1, v2)) {
+                    // Set the pixel using safe pixel function
+                    setSafePixel(ivec2(x, y), color);
+                }
+            }
+        }
+    }
+
+private:
+    // Helper function to check if a point is inside the triangle using the cross product method
+    bool isInsideTriangle(ivec2 p, ivec2 v0, ivec2 v1, ivec2 v2) {
+        // Cross product to find if point p is on the left side of each edge
+        int d1 = (p.x - v0.x) * (v1.y - v0.y) - (p.y - v0.y) * (v1.x - v0.x);
+        int d2 = (p.x - v1.x) * (v2.y - v1.y) - (p.y - v1.y) * (v2.x - v1.x);
+        int d3 = (p.x - v2.x) * (v0.y - v2.y) - (p.y - v2.y) * (v0.x - v2.x);
+
+        // Check if point p is inside the triangle by verifying all cross products have the same sign
+        bool hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+        bool hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+        return !(hasNeg && hasPos);
     }
 };
 

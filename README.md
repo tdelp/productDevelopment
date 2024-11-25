@@ -1,178 +1,156 @@
-# GUIFile
+# GUI Layout Application
 
-The `GUIFile` class is designed to manage the loading and saving of a GUI environment using XML files. It supports the staging of GUI elements (lines, boxes, points) using setter methods, which can then be written to a file. Additionally, it provides methods for reading an XML file and storing the parsed GUI elements, which can later be accessed through getter methods.
+This document serves as a guide to understanding the codebase for the GUI layout application, detailing how the `GUIFile`, `Layout`, `Parse`, `Element` classes, and the `ElementFactory` function together to create a modular and interactive GUI system in SDL. This application dynamically renders GUI elements from an XML configuration file, adjusting their states based on user interactions.
 
-## Class Overview
+## Project Structure
 
-The `GUIFile` class uses internal containers to store lines, boxes, and points, which can be easily managed and cleared between file operations. These containers are used for both staging elements before writing to a file and for storing elements parsed from an XML file.
+- **GUIFile**: Manages drawing logic for different elements.
+- **Layout**: Organizes GUI elements and controls rendering behavior based on activity states.
+- **Parse**: Parses an XML file into nested layouts and elements for display.
+- **Element**: Base class for drawable elements.
+- **ElementFactory**: Creates element instances based on XML input data.
 
-## Public Methods
+## Components
 
-### addLine
-- **Description**: Stages a line element to be stored in the class.
-- **Parameters**:
-  - `start` (std::array<float, 2>): Starting coordinates of the line.
-  - `end` (std::array<float, 2>): Ending coordinates of the line.
-  - `color` (std::array<float, 3>): Color of the line in RGB format.
-- **Behavior**: Adds the specified line to the internal lines container for future writing to an XML file.
+### 1. GUIFile
+`GUIFile` is the main drawing interface for the application. It encapsulates various drawable elements, such as lines, boxes, points, and triangles, and provides methods to handle each element's rendering logic. The implementation ensures safe rendering with bounds-checking for each element type.
 
-### addBox
-- **Description**: Stages a box element to be stored in the class.
-- **Parameters**:
-  - `min` (std::array<float, 2>): Minimum bounds of the box.
-  - `max` (std::array<float, 2>): Maximum bounds of the box.
-  - `color` (std::array<float, 3>): Color of the box in RGB format.
-- **Behavior**: Adds the specified box to the internal boxes container for future writing to an XML file.
+### 2. Layout
+The `Layout` class represents a logical container for `Element` objects and other nested `Layout`s. Key features of `Layout` include:
 
-### addPoint
-- **Description**: Stages a point element to be stored in the class.
-- **Parameters**:
-  - `position` (std::array<float, 2>): Position of the point.
-  - `color` (std::array<float, 3>): Color of the point in RGB format.
-- **Behavior**: Adds the specified point to the internal points container for future writing to an XML file.
+- **Element Management**: Supports adding, removing, and rendering elements based on user interactions.
+- **Nested Layouts**: Allows layouts within layouts, enabling complex UI structures.
+- **Dynamic Rendering**: Manages the position and size of layouts based on the `sX`, `sY`, `eX`, `eY` attributes defined in the XML configuration. This flexibility allows for positioning layouts relative to parent dimensions.
+- **Active State**: The `setActive` method toggles layout visibility based on user interaction.
 
-### readFile
-- **Description**: Reads an XML file and parses the contents into the internal containers.
-- **Parameters**:
-  - `filename` (std::string): The name of the file to read.
-- **Behavior**: Opens the specified XML file, reads its contents, and parses the GUI elements (lines, boxes, points) into the appropriate containers. Returns `true` if the file was successfully read, otherwise `false`.
+### 3. Parse
+The `Parse` class handles reading XML data to dynamically build the layout structure. It loads and parses elements by reading `vec2` and `vec3` tags to set position and color values, respectively. The parser recursively loads nested layouts, using `ElementFactory` to instantiate specific elements based on tag types.
 
-### getLines
-- **Description**: Retrieves the stored line elements.
-- **Return Type**: `const std::vector<Line>&`
-- **Behavior**: Returns a constant reference to the vector containing all the parsed line elements.
+**Parsing Process**:
+- **Root Layout**: Initiates parsing from the root layout defined in the XML.
+- **Element Parsing**: Extracts and instantiates elements like lines, points, boxes, and triangles based on tags.
+- **Attribute Parsing**: Reads specific attributes (`sX`, `sY`, `eX`, `eY`, and `active`) for layout positioning.
 
-### getBoxes
-- **Description**: Retrieves the stored box elements.
-- **Return Type**: `const std::vector<Box>&`
-- **Behavior**: Returns a constant reference to the vector containing all the parsed box elements.
+### 4. Element
+`Element` is an abstract base class for drawable components. Derived classes (`LineElement`, `BoxElement`, `PointElement`, and `TriangleElement`) implement the `draw` and `isInside` methods to define each element’s behavior:
 
-### getPoints
-- **Description**: Retrieves the stored point elements.
-- **Return Type**: `const std::vector<Point>&`
-- **Behavior**: Returns a constant reference to the vector containing all the parsed point elements.
+- **LineElement**: Draws lines using the Bresenham algorithm.
+- **BoxElement**: Draws boxes with boundary checks.
+- **PointElement**: Represents a single pixel point on the screen.
+- **TriangleElement**: Uses the cross-product method to check if a point is inside the triangle.
 
-## XML Writing Methods
+### 5. ElementFactory
+The `ElementFactory` class creates instances of `Element` subclasses based on XML tags. This factory pattern encapsulates element creation logic, keeping the parser code clean and extensible.
 
-### openOutputFile
-- **Description**: Opens the output file for writing and initializes the XML structure.
-- **Behavior**: Writes the opening `<layout>` tag to the file and ensures the file is ready for subsequent writes.
+## Main Application Flow
 
-### closeOutputFile
-- **Description**: Closes the output file after completing the write operations.
-- **Behavior**: Writes the closing `</layout>` tag and properly closes the file.
+The application initializes SDL, creates a `Screen` object, and parses an XML file (`input.xml`) into a `rootLayout`. The main loop checks the mouse position to toggle nested layouts and renders elements based on their active states. The `Layout::render` method recursively draws all active elements.
 
-### writeLineElement
-- **Description**: Writes a staged line element to the XML file.
-- **Parameters**:
-  - `line` (Line): The line element to write.
-- **Behavior**: Outputs the XML representation of the line element to the file.
-
-### writeBoxElement
-- **Description**: Writes a staged box element to the XML file.
-- **Parameters**:
-  - `box` (Box): The box element to write.
-- **Behavior**: Outputs the XML representation of the box element to the file.
-
-### writePointElement
-- **Description**: Writes a staged point element to the XML file.
-- **Parameters**:
-  - `point` (Point): The point element to write.
-- **Behavior**: Outputs the XML representation of the point element to the file.
-
-## Private Methods
-
-### parseVec2
-- **Description**: Parses a 2D vector (vec2 or ivec2) from the XML data.
-- **Parameters**:
-  - `stream` (std::istringstream&): The input stream containing the XML data.
-  - `vector` (std::array<float, 2>&): The array to store the parsed values.
-- **Behavior**: Extracts the `<x>` and `<y>` values and stores them in the provided array.
-
-### parseVec3
-- **Description**: Parses a 3D vector (vec3 or ivec3) from the XML data.
-- **Parameters**:
-  - `stream` (std::istringstream&): The input stream containing the XML data.
-  - `vector` (std::array<float, 3>&): The array to store the parsed values.
-- **Behavior**: Extracts the `<x>`, `<y>`, and `<z>` values and stores them in the provided array.
-
-## Container Design
-
-The `GUIFile` class uses the following containers for managing GUI elements:
-- `std::vector<Line>`: Stores line elements.
-- `std::vector<Box>`: Stores box elements.
-- `std::vector<Point>`: Stores point elements.
-
-### Container Management
-- Containers are cleared when switching between reading and writing operations to optimize memory usage.
-- Elements are staged using setter methods (`addLine`, `addBox`, `addPoint`) and accessed through getter methods (`getLines`, `getBoxes`, `getPoints`) without directly modifying the stored data.
-
-## Future Enhancements
-
-The current implementation is designed to handle simple XML structures. As client requirements evolve, the following enhancements might be considered:
-- Support for hierarchical XML structures.
-- Error handling improvements for more robust parsing of malformed XML files.
-- Extending the GUI element types to support additional shapes or attributes.
-
-## UML Diagram
-
-+-----------------+
-|     GUIFile     |
-+-----------------+
-| - lines: std::vector<Line>    |
-| - boxes: std::vector<Box>     |
-| - points: std::vector<Point>  |
-| - outputFile: std::ofstream   |
-+-----------------+
-| + addLine(start, end, color)                |
-| + addBox(min, max, color)                   |
-| + addPoint(position, color)                 |
-| + readFile(filename: string): bool          |
-| + getLines(): const std::vector<Line>&      |
-| + getBoxes(): const std::vector<Box>&      |
-| + getPoints(): const std::vector<Point>&   |
-| - parseLineData(data: string)              |
-| - parseBoxData(data: string)               |
-| - parsePointData(data: string)             |
-| - parseVec2(stream: istringstream, vector) |
-| - parseVec3(stream: istringstream, vector) |
-| - writeLineElement(line: Line)             |
-| - writeBoxElement(box: Box)                |
-| - writePointElement(point: Point)          |
-| - openOutputFile()                         |
-| - closeOutputFile()                        |
-+-----------------+
-
-+---------------------------------+
-|            GUIFile              |
-+---------------------------------+
-| Attributes:                     |
-| - lines: vector<Line>           |
-| - boxes: vector<Box>            |
-| - points: vector<Point>         |
-| - outputFile: ofstream          |
-+---------------------------------+
-| Methods:                        |
-| + addLine(), addBox(), addPoint() |
-| + readFile(filename: string)    |
-| + getLines(), getBoxes(), getPoints() |
-| - parseLineData(), parseBoxData()|
-| - writeLineElement(), writeBoxElement()|
-+---------------------------------+
+**Mouse Interaction**:
+- Checks if the mouse is within a triangle’s bounds to toggle the nested layout’s `active` state.
 
 
-## Usage Example
+# Application Demo Modifications
 
-Here is a basic example of how to use the `GUIFile` class:
+- **Root Layout**: Contains a triangle and a box.
+- **Nested Layout**: Includes three elements - a triangle, a line, and a point.
+- **Interaction**: Moving the mouse cursor inside the triangle toggles the activation of the nested layout.
 
-```cpp
-GUIFile guiFile;
-guiFile.addLine({0.0f, 0.0f}, {1.0f, 1.0f}, {255.0f, 0.0f, 0.0f}); // Staging a line
-guiFile.addBox({0.0f, 0.0f}, {2.0f, 2.0f}, {0.0f, 255.0f, 0.0f});  // Staging a box
-guiFile.addPoint({1.0f, 1.0f}, {0.0f, 0.0f, 255.0f});              // Staging a point
+## Run Instructions
 
-guiFile.readFile("input.xml");                                      // Reading from an XML file
+1. **Build the project.**
+2. Place `input.xml` in the working directory.
+3. Run the application. Use the SDL window to interact with elements.
 
-const auto& lines = guiFile.getLines();                             // Accessing parsed lines
-const auto& boxes = guiFile.getBoxes();                             // Accessing parsed boxes
-const auto& points = guiFile.getPoints();                           // Accessing parsed points
+---
+
+# XML Configuration and Interaction Demo
+
+To simulate interactions and understand layout nesting behavior:
+
+1. Start the application and observe root elements (e.g., triangle, box).
+2. Hover over the triangle to toggle nested layout visibility.
+3. Adjust layout positions by modifying `sX`, `sY`, `eX`, `eY` values in the XML configuration.
+
+This setup enables a responsive and interactive GUI system that can be easily extended by modifying the XML configuration file.
+
+## link to visual diagram showing relational spacing
+[Link](diagram.jpg)
+
+# Relational Spacing in GUI Layout
+
+This document explains how relational spacing works for the XML file provided, focusing on how `sX`, `sY`, `eX`, and `eY` attributes determine the position and size of nested layouts.
+
+## XML Structure and Relational Spacing
+
+### Root Layout
+
+The root `<layout>` element contains two direct child elements (a triangle and a box) and one nested layout.
+
+1. **Triangle**:
+   - Defined by three points with absolute coordinates:
+     - `(600, 100)`, `(700, 250)`, and `(650, 400)`.
+   - Since this triangle is a direct child of the root layout, its coordinates are based on the entire screen area (absolute positioning).
+
+2. **Box**:
+   - Defined with absolute coordinates:
+     - Top-left corner: `(800, 150)`, bottom-right corner: `(1000, 350)`.
+   - Like the triangle, this box is positioned within the root layout’s dimensions, relative to the screen.
+
+3. **Nested Layout**:
+   - The nested layout has attributes `sX`, `sY`, `eX`, and `eY`, which define its position and size relative to the root layout.
+   - **Relational Coordinates**:
+     - `sX: 0.1`, `sY: 0.1`: The starting position of the nested layout is 10% of the root layout’s width and height from the top-left corner.
+     - `eX: 0.5`, `eY: 0.5`: The ending position of the nested layout extends to 50% of the root layout’s width and height.
+   - This nested layout will, therefore, occupy the area from `(10%, 10%)` to `(50%, 50%)` of the screen (or root layout), creating a contained region within the root layout.
+
+### Elements within the Nested Layout
+
+The nested layout contains a triangle, a line, and a point. These elements have absolute coordinates, but they are positioned within the bounds of the nested layout.
+
+1. **Triangle in Nested Layout**:
+   - Defined by three points:
+     - `(100, 150)`, `(500, 250)`, and `(350, 200)`.
+   - Since these coordinates are within the nested layout, they are based on the dimensions of the nested layout area (from `(10%, 10%)` to `(50%, 50%)` of the root layout).
+
+2. **Line in Nested Layout**:
+   - Defined with two endpoints:
+     - Start: `(150, 150)`, End: `(400, 400)`.
+   - These coordinates are also within the nested layout’s bounds.
+
+3. **Point in Nested Layout**:
+   - Defined by a single position:
+     - `(250, 250)`.
+   - This point is positioned within the nested layout’s coordinates and will render inside the area defined by the nested layout’s `sX`, `sY`, `eX`, and `eY`.
+
+## Summary
+
+The `sX`, `sY`, `eX`, and `eY` attributes in each `<layout>` tag allow nested layouts to be positioned relative to their parent layout. This approach enables flexible, relational positioning that automatically adjusts based on the dimensions of the parent layout, supporting responsive and adaptive GUI designs.
+
+
+## XML Input Described Above
+
+```xml
+<layout>
+    <triangle>
+        <vec2><x>600</x><y>100</y></vec2>
+        <vec2><x>700</x><y>250</y></vec2>
+        <vec2><x>650</x><y>400</y></vec2>
+        <vec3><x>255</x><y>100</x><z>50</z></vec3>
+    </triangle>
+    <box>
+        <vec2><x>800</x><y>150</y></vec2>
+        <vec2><x>1000</x><y>350</y></vec2>
+        <vec3><x>100</x><y>150</x><z>200</z></vec3>
+    </box>
+    <layout>
+        <sX>0.1</sX>
+        <sY>0.1</sY>
+        <eX>0.5</eX>
+        <eY>0.5</eY>
+        <active>false</active>
+        <triangle>...</triangle>
+        <line>...</line>
+        <point>...</point>
+    </layout>
+</layout>
